@@ -26,7 +26,7 @@ export default defineConfig([
 	},
 	{
 		files: ['**/*.jsx', '**/*.tsx'],
-		...pluginReact.configs.flat.recommended,
+		...pluginReact.configs.flat['recommended'],
 		settings: {
 			react: {version: 'detect'},
 			jsxRuntime: 'automatic',

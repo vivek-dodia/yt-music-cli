@@ -1,13 +1,15 @@
 // Audio playback service using play-sound
 import playSound from 'play-sound';
 
+type PlaySoundResult = {kill: () => void};
+
 export type PlayOptions = {
 	volume?: number;
 };
 
 class PlayerService {
 	private static instance: PlayerService;
-	private currentSound: unknown = null;
+	private currentSound: PlaySoundResult | null = null;
 
 	private constructor() {}
 
@@ -21,8 +23,9 @@ class PlayerService {
 	async play(_url: string): Promise<void> {
 		this.stop();
 
-		return new Promise((resolve, reject) => {
-			this.currentSound = playSound.play(_url, (err: Error) => {
+		return new Promise<void>((resolve, reject) => {
+			// @ts-expect-error - play-sound types are not complete
+			this.currentSound = playSound.play(_url, (err?: Error) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -41,7 +44,7 @@ class PlayerService {
 
 	resume(url: string): void {
 		if (!this.currentSound) {
-			this.play(url);
+			void this.play(url);
 		}
 	}
 

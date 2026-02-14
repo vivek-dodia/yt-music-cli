@@ -1,15 +1,36 @@
 // Main layout shell
 import React from 'react';
-import {useNavigation} from '../../stores/navigation.store.tsx';
+import {useNavigation} from '../../hooks/useNavigation.ts';
 import PlaylistList from '../playlist/PlaylistList.tsx';
+import Help from '../common/Help.tsx';
 import {useTheme} from '../../hooks/useTheme.ts';
+import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import SearchLayout from './SearchLayout.tsx';
 import PlayerLayout from './PlayerLayout.tsx';
+import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {Box} from 'ink';
 
 export default function MainLayout() {
 	const {theme} = useTheme();
-	const {state: navState} = useNavigation();
+	const {state: navState, dispatch} = useNavigation();
+
+	// Navigate to different views
+	const goToSearch = React.useCallback(() => {
+		dispatch({category: 'NAVIGATE', view: VIEW.SEARCH});
+	}, [dispatch]);
+
+	const goToPlaylists = React.useCallback(() => {
+		dispatch({category: 'NAVIGATE', view: VIEW.PLAYLISTS});
+	}, [dispatch]);
+
+	const goBack = React.useCallback(() => {
+		dispatch({category: 'GO_BACK'});
+	}, [dispatch]);
+
+	// Global keyboard bindings
+	useKeyBinding(KEYBINDINGS.SEARCH, goToSearch);
+	useKeyBinding(KEYBINDINGS.PLAYLISTS, goToPlaylists);
+	useKeyBinding(KEYBINDINGS.HELP, goBack);
 
 	const renderView = () => {
 		switch (navState.currentView) {
@@ -21,6 +42,9 @@ export default function MainLayout() {
 
 			case 'playlists':
 				return <PlaylistList />;
+
+			case 'help':
+				return <Help />;
 
 			default:
 				return <PlayerLayout />;

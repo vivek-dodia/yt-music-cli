@@ -3,7 +3,7 @@ import React from 'react';
 import {Box, Text} from 'ink';
 import {useTheme} from '../../hooks/useTheme.ts';
 import {getConfigService} from '../../services/config/config.service.ts';
-import type {LocalPlaylist} from '../../types/playlist.types.ts';
+import type {Playlist} from '../../types/youtube-music.types.ts';
 
 export default function PlaylistList() {
 	const {theme} = useTheme();
@@ -28,13 +28,13 @@ export default function PlaylistList() {
 			{playlists.length === 0 ? (
 				<Text color={theme.colors.dim}>No playlists yet</Text>
 			) : (
-				playlists.map((playlist: LocalPlaylist, index: number) => (
+				playlists.map((playlist: Playlist, index: number) => (
 					<Box key={playlist.playlistId || index} paddingX={1}>
-						<Text color={theme.colors.primary}>{index + 1}.</Text>{' '}
+						<Text color={theme.colors.primary}>{index + 1}.</Text>
+						<Text> </Text>
 						<Text color={theme.colors.text}>{playlist.name}</Text>
 						<Text color={theme.colors.dim}>
-							{' '}
-							({playlist.tracks?.length || 0} tracks)
+							<Text> </Text>({playlist.tracks?.length || 0} tracks)
 						</Text>
 					</Box>
 				))
@@ -44,7 +44,7 @@ export default function PlaylistList() {
 			<Box marginTop={1}>
 				<Text color={theme.colors.dim}>
 					Press <Text color={theme.colors.text}>c</Text> to create playlist
-					{' | '}
+					<Text> | </Text>
 					<Text color={theme.colors.text}>Esc</Text> to go back
 				</Text>
 			</Box>

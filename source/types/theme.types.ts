@@ -6,6 +6,7 @@ export type ColorName =
 	| 'yellow'
 	| 'blue'
 	| 'magenta'
+	| 'purple'
 	| 'cyan'
 	| 'white'
 	| 'blackBright'

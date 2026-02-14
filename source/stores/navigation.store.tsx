@@ -61,7 +61,7 @@ function navigationReducer(
 	}
 }
 
-type NavigationContextValue = {
+export type NavigationContextValue = {
 	state: NavigationState;
 	dispatch: (action: NavigationAction) => void;
 };

@@ -1,8 +1,8 @@
 // Configuration management service
-import {CONFIG_DIR, CONFIG_FILE, DEFAULT_THEME} from '../../utils/constants.ts';
+import {CONFIG_DIR, CONFIG_FILE} from '../../utils/constants.ts';
 import {mkdirSync, readFileSync, writeFileSync, existsSync} from 'node:fs';
 import type {Config} from '../../types/config.types.ts';
-import {BUILTIN_THEMES} from '../../config/themes.config.ts';
+import {BUILTIN_THEMES, DEFAULT_THEME} from '../../config/themes.config.ts';
 import type {Theme} from '../../types/theme.types.ts';
 
 class ConfigService {
@@ -69,7 +69,12 @@ class ConfigService {
 	}
 
 	updateTheme(themeName: string): void {
-		this.config.theme = themeName;
+		this.config.theme = themeName as
+			| 'dark'
+			| 'light'
+			| 'midnight'
+			| 'matrix'
+			| 'custom';
 		this.save();
 	}
 
@@ -78,7 +83,11 @@ class ConfigService {
 			return this.config.customTheme;
 		}
 
-		return BUILTIN_THEMES[this.config.theme] || DEFAULT_THEME;
+		const builtinTheme = BUILTIN_THEMES[this.config.theme];
+		if (builtinTheme) {
+			return builtinTheme;
+		}
+		return DEFAULT_THEME;
 	}
 
 	setCustomTheme(theme: Theme): void {
@@ -88,11 +97,14 @@ class ConfigService {
 	}
 
 	getKeybinding(action: string): string[] | undefined {
-		return this.config.keybindings[action];
+		return this.config.keybindings[action]?.keys;
 	}
 
 	setKeybinding(action: string, keys: string[]): void {
-		this.config.keybindings[action] = keys;
+		this.config.keybindings[action] = {
+			keys,
+			description: `Custom binding for ${action}`,
+		};
 		this.save();
 	}
 

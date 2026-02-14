@@ -5,8 +5,8 @@ export const APP_VERSION = '0.0.1';
 // Config directory
 export const CONFIG_DIR =
 	process.platform === 'win32'
-		? `${process.env.USERPROFILE}\.youtube-music-cli`
-		: `${process.env.HOME}/.youtube-music-cli`;
+		? `${process.env['USERPROFILE']}\\.youtube-music-cli`
+		: `${process.env['HOME']}/.youtube-music-cli`;
 
 export const CONFIG_FILE = `${CONFIG_DIR}/config.json`;
 
@@ -84,3 +84,6 @@ export const THEMES = {
 // Update intervals
 export const PROGRESS_UPDATE_INTERVAL = 100; // ms
 export const STATUS_UPDATE_INTERVAL = 1000; // ms
+
+// Default theme
+export const DEFAULT_THEME = 'dark' as const;

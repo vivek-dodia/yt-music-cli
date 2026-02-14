@@ -49,14 +49,16 @@ export default function NowPlaying() {
 			<Box marginTop={1}>
 				<Text color={theme.colors.text}>
 					{formatTime(playerState.progress)}
-				</Text>{' '}
+				</Text>
+				<Text> </Text>
 				<Text color={theme.colors.dim}>
 					[
 					{Math.round(
 						(playerState.progress / (playerState.duration || 1)) * 100,
 					)}
 					%]
-				</Text>{' '}
+				</Text>
+				<Text> </Text>
 				<Text color={theme.colors.text}>
 					{formatTime(playerState.duration)}
 				</Text>

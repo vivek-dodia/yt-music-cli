@@ -1,4 +1,6 @@
 // Playlist type definitions
+import type {Track} from './youtube-music.types.ts';
+
 export interface Playlist {
 	playlistId: string;
 	name: string;
@@ -9,6 +11,6 @@ export interface PlaylistEntry {
 	playlistId: string;
 }
 
-export interface Playlist extends Playlist {
+export interface PlaylistWithEntries extends Playlist {
 	entries: PlaylistEntry[];
 }

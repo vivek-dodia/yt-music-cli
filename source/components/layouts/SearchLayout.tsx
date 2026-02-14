@@ -1,35 +1,37 @@
 // Search view layout
 import React from 'react';
-import {useNavigation} from '../../stores/navigation.store.tsx';
+import {useNavigation} from '../../hooks/useNavigation.ts';
 import {useYouTubeMusic} from '../../hooks/useYouTubeMusic.ts';
 import SearchResults from '../search/SearchResults.tsx';
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect} from 'react';
 import type {SearchResult} from '../../types/youtube-music.types.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import SearchBar from '../search/SearchBar.tsx';
+import {useKeyBinding} from '../../hooks/useKeyboard.ts';
+import {KEYBINDINGS} from '../../utils/constants.ts';
 import {Box, Text} from 'ink';
 
 export default function SearchLayout() {
 	const {theme} = useTheme();
-	const {state: navState} = useNavigation();
-	const {search, isLoading, error} = useYouTubeMusic();
+	const {state: navState, dispatch} = useNavigation();
+	const {isLoading, error} = useYouTubeMusic();
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [hasSearched, setHasSearched] = useState(false);
 
-	const handleSearch = useCallback(async () => {
-		if (!navState.searchQuery.trim()) {
-			return;
-		}
+	// Handle going back
+	const goBack = useCallback(() => {
+		dispatch({category: 'GO_BACK'});
+	}, [dispatch]);
 
-		setHasSearched(true);
-		const response = await search(navState.searchQuery, {
-			type: navState.searchType as 'song' | 'album' | 'artist' | 'playlist',
-		});
+	useKeyBinding(KEYBINDINGS.BACK, goBack);
 
-		if (response) {
-			setResults(response.results);
-		}
-	}, [navState.searchQuery, navState.searchType, search]);
+	// Reset search state when leaving view
+	useEffect(() => {
+		return () => {
+			setResults([]);
+			setHasSearched(false);
+		};
+	}, []);
 
 	return (
 		<Box flexDirection="column" gap={1}>
@@ -44,11 +46,15 @@ export default function SearchLayout() {
 					Search
 				</Text>
 				{' | '}
-				<Text color={theme.colors.dim}>Type to search, Enter to play</Text>
+				<Text color={theme.colors.dim}>Type to search, Enter to search</Text>
 			</Box>
 
 			{/* Search Bar */}
-			<SearchBar onSearch={handleSearch} />
+			<SearchBar
+				onInput={input => {
+					dispatch({category: 'SET_SEARCH_QUERY', query: input});
+				}}
+			/>
 
 			{/* Loading */}
 			{isLoading && <Text color={theme.colors.accent}>Searching...</Text>}

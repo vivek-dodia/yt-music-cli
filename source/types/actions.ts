@@ -90,3 +90,33 @@ export interface SetErrorAction {
 	readonly category: 'SET_ERROR';
 	error: string | null;
 }
+
+// Navigation actions
+export interface NavigateAction {
+	readonly category: 'NAVIGATE';
+	view: string;
+}
+
+export interface GoBackAction {
+	readonly category: 'GO_BACK';
+}
+
+export interface SetSearchQueryAction {
+	readonly category: 'SET_SEARCH_QUERY';
+	query: string;
+}
+
+export interface SetSearchCategoryAction {
+	readonly category: 'SET_SEARCH_CATEGORY';
+	searchType: string;
+}
+
+export interface SetSelectedResultAction {
+	readonly category: 'SET_SELECTED_RESULT';
+	index: number;
+}
+
+export interface SetSelectedPlaylistAction {
+	readonly category: 'SET_SELECTED_PLAYLIST';
+	index: number;
+}

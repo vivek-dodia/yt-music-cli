@@ -49,7 +49,7 @@ function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
 					return {
 						...state,
 						queuePosition: 0,
-						currentTrack: state.queue[0],
+						currentTrack: state.queue[0] ?? null,
 						progress: 0,
 					};
 				}
@@ -58,7 +58,7 @@ function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
 			return {
 				...state,
 				queuePosition: nextPosition,
-				currentTrack: state.queue[nextPosition],
+				currentTrack: state.queue[nextPosition] ?? null,
 				progress: 0,
 			};
 
@@ -76,7 +76,7 @@ function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
 			return {
 				...state,
 				queuePosition: prevPosition,
-				currentTrack: state.queue[prevPosition],
+				currentTrack: state.queue[prevPosition] ?? null,
 				progress: 0,
 			};
 
@@ -99,9 +99,11 @@ function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
 			return {...state, shuffle: !state.shuffle};
 
 		case 'TOGGLE_REPEAT':
-			const repeatModes: Array = ['off', 'all', 'one'];
+			const repeatModes: Array<'off' | 'all' | 'one'> = ['off', 'all', 'one'];
 			const currentIndex = repeatModes.indexOf(state.repeat);
-			return {...state, repeat: repeatModes[(currentIndex + 1) % 3]};
+			const nextRepeat: 'off' | 'all' | 'one' =
+				repeatModes[(currentIndex + 1) % 3] ?? 'off';
+			return {...state, repeat: nextRepeat};
 
 		case 'SET_QUEUE':
 			return {
@@ -127,11 +129,11 @@ function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
 			};
 
 		case 'SET_QUEUE_POSITION':
-			if (action.index >= 0 && action.index < state.queue.length) {
+			if (action.position >= 0 && action.position < state.queue.length) {
 				return {
 					...state,
-					queuePosition: action.index,
-					currentTrack: state.queue[action.index],
+					queuePosition: action.position,
+					currentTrack: state.queue[action.position] ?? null,
 					progress: 0,
 				};
 			}

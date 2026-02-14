@@ -1,5 +1,7 @@
 // CLI flag types
 export interface Flags {
+	help?: boolean;
+	version?: boolean;
 	theme?: string;
 	volume?: number;
 	shuffle?: boolean;

@@ -1,5 +1,12 @@
 // YouTube Music API integration hook
-import type {SearchOptions} from '../types/youtube-music.types.ts';
+import type {
+	SearchOptions,
+	SearchResponse,
+	Track,
+	Album,
+	Artist,
+	Playlist,
+} from '../types/youtube-music.types.ts';
 import {getMusicService} from '../services/youtube-music/api.ts';
 import {useState, useCallback} from 'react';
 
@@ -9,7 +16,10 @@ export function useYouTubeMusic() {
 	const musicService = getMusicService();
 
 	const search = useCallback(
-		async (query: string, options: SearchOptions = {}): Promise => {
+		async (
+			query: string,
+			options: SearchOptions = {},
+		): Promise<SearchResponse | null> => {
 			setIsLoading(true);
 			setError(null);
 
@@ -27,7 +37,7 @@ export function useYouTubeMusic() {
 	);
 
 	const getTrack = useCallback(
-		async (videoId: string): Promise => {
+		async (videoId: string): Promise<Track | null> => {
 			setIsLoading(true);
 			setError(null);
 
@@ -45,7 +55,7 @@ export function useYouTubeMusic() {
 	);
 
 	const getAlbum = useCallback(
-		async (albumId: string): Promise => {
+		async (albumId: string): Promise<Album | null> => {
 			setIsLoading(true);
 			setError(null);
 
@@ -63,7 +73,7 @@ export function useYouTubeMusic() {
 	);
 
 	const getArtist = useCallback(
-		async (artistId: string): Promise => {
+		async (artistId: string): Promise<Artist | null> => {
 			setIsLoading(true);
 			setError(null);
 
@@ -81,7 +91,7 @@ export function useYouTubeMusic() {
 	);
 
 	const getPlaylist = useCallback(
-		async (playlistId: string): Promise => {
+		async (playlistId: string): Promise<Playlist | null> => {
 			setIsLoading(true);
 			setError(null);
 
@@ -99,7 +109,7 @@ export function useYouTubeMusic() {
 	);
 
 	const getSuggestions = useCallback(
-		async (trackId: string): Promise => {
+		async (trackId: string): Promise<Track[]> => {
 			setIsLoading(true);
 			setError(null);
 

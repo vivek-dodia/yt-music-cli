@@ -7,13 +7,30 @@ import type {
 	SearchOptions,
 	SearchResponse,
 } from '../../types/youtube-music.types.ts';
-import Innertube from 'node-youtube-music';
+import * as InnertubeModule from 'node-youtube-music';
+
+// Type-safe access to the module
+type InnertubeInterface = {
+	search: (query: string, options?: {type?: string}) => Promise<unknown[]>;
+	getTrack: (videoId: string) => Promise<Track>;
+	getAlbum: (albumId: string) => Promise<Album>;
+	getArtist: (artistId: string) => Promise<Artist>;
+	getPlaylist: (playlistId: string) => Promise<Playlist>;
+	getRelated: (trackId: string) => Promise<Track[]>;
+	getStreamInfo: (videoId: string) => Promise<{url: string}>;
+};
+
+const Innertube = ((InnertubeModule as {default?: InnertubeInterface})
+	.default ?? InnertubeModule) as InnertubeInterface;
+
+// Type for API response items
+type ApiItem = {type: string} & Record<string, unknown>;
 
 class MusicService {
-	private api: Innertube;
+	private api: InnertubeInterface;
 
 	constructor() {
-		this.api = new Innertube();
+		this.api = Innertube;
 	}
 
 	async search(
@@ -27,15 +44,15 @@ class MusicService {
 		const results: SearchResponse['results'] = [];
 
 		// Parse results based on type
-		for (const item of result) {
+		for (const item of result as ApiItem[]) {
 			if (item.type === 'song') {
-				results.push({type: 'song', data: item as Track});
+				results.push({type: 'song', data: item as unknown as Track});
 			} else if (item.type === 'album') {
-				results.push({type: 'album', data: item as Album});
+				results.push({type: 'album', data: item as unknown as Album});
 			} else if (item.type === 'artist') {
-				results.push({type: 'artist', data: item as Artist});
+				results.push({type: 'artist', data: item as unknown as Artist});
 			} else if (item.type === 'playlist') {
-				results.push({type: 'playlist', data: item as Playlist});
+				results.push({type: 'playlist', data: item as unknown as Playlist});
 			}
 		}
 

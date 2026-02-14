@@ -1,19 +1,47 @@
 // Search bar component
 import React from 'react';
-import {useNavigation} from '../../stores/navigation.store.tsx';
-import {useState} from 'react';
-import {SEARCH_TYPE} from '../../utils/constants.ts';
+import {useNavigation} from '../../hooks/useNavigation.ts';
+import {useState, useCallback, useEffect} from 'react';
+import {SEARCH_TYPE, KEYBINDINGS} from '../../utils/constants.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
+import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import {Box, Text} from 'ink';
 
 type Props = {
-	onSearch: () => void;
+	onInput: (input: string) => void;
 };
 
-export default function SearchBar({_onSearch}: Props) {
+export default function SearchBar({onInput}: Props) {
 	const {theme} = useTheme();
-	const {state: navState} = useNavigation();
-	const [input] = useState('');
+	const {state: navState, dispatch} = useNavigation();
+	const [input, setInput] = useState('');
+	const [selectedTypeIndex, setSelectedTypeIndex] = useState(0);
+
+	const searchTypes = Object.values(SEARCH_TYPE);
+
+	// Handle type switching
+	const cycleType = useCallback(() => {
+		const nextIndex = (selectedTypeIndex + 1) % searchTypes.length;
+		setSelectedTypeIndex(nextIndex);
+		const nextType = searchTypes[nextIndex];
+		if (nextType) {
+			dispatch({
+				category: 'SET_SEARCH_CATEGORY',
+				searchType: nextType,
+			});
+		}
+	}, [selectedTypeIndex, searchTypes, dispatch]);
+
+	useKeyBinding(['tab'], cycleType);
+	useKeyBinding(KEYBINDINGS.CLEAR_SEARCH, () => {
+		setInput('');
+		onInput('');
+	});
+
+	// Update navigation state when input changes
+	useEffect(() => {
+		dispatch({category: 'SET_SEARCH_QUERY', query: input});
+	}, [input, dispatch]);
 
 	return (
 		<Box
@@ -25,7 +53,7 @@ export default function SearchBar({_onSearch}: Props) {
 			{/* Search Type Toggle */}
 			<Box marginBottom={1}>
 				<Text color={theme.colors.dim}>Type: </Text>
-				{Object.values(SEARCH_TYPE).map(type => (
+				{searchTypes.map((type, index) => (
 					<Text
 						key={type}
 						color={
@@ -35,9 +63,11 @@ export default function SearchBar({_onSearch}: Props) {
 						}
 						bold={navState.searchType === type}
 					>
-						{type}{' '}
+						{type}
+						{index < searchTypes.length - 1 && ' '}
 					</Text>
 				))}
+				<Text color={theme.colors.dim}> (Tab to switch)</Text>
 			</Box>
 
 			{/* Input */}
@@ -48,7 +78,9 @@ export default function SearchBar({_onSearch}: Props) {
 			</Box>
 
 			{/* Instructions */}
-			<Text color={theme.colors.dim}>Type to search, Enter to submit</Text>
+			<Text color={theme.colors.dim}>
+				Type to search, Enter to search, Tab to change type, Esc to clear
+			</Text>
 		</Box>
 	);
 }

@@ -1,16 +1,6 @@
 // Theme management hook
-import {
-	ThemeContext,
-	type ThemeContextValue,
-} from '../contexts/theme.context.tsx';
-import {useContext} from 'react';
+import {useTheme as useThemeContext} from '../contexts/theme.context.tsx';
 
-export function useTheme(): ThemeContextValue {
-	const context = useContext(ThemeContext);
-
-	if (!context) {
-		throw new Error('useTheme must be used within ThemeProvider');
-	}
-
-	return context;
+export function useTheme() {
+	return useThemeContext();
 }

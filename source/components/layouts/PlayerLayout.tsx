@@ -2,12 +2,24 @@ import React from 'react';
 import PlayerControls from '../player/PlayerControls.tsx';
 import {usePlayer} from '../../hooks/usePlayer.ts';
 import NowPlaying from '../player/NowPlaying.tsx';
+import ProgressBar from '../player/ProgressBar.tsx';
+import QueueList from '../player/QueueList.tsx';
 import {useTheme} from '../../hooks/useTheme.ts';
+import {useNavigation} from '../../hooks/useNavigation.ts';
+import {useKeyBinding} from '../../hooks/useKeyboard.ts';
+import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {Box, Text} from 'ink';
 
 export default function PlayerLayout() {
 	const {theme} = useTheme();
 	const {state: playerState} = usePlayer();
+	const {dispatch} = useNavigation();
+
+	const goHelp = React.useCallback(() => {
+		dispatch({category: 'NAVIGATE', view: VIEW.HELP});
+	}, [dispatch]);
+
+	useKeyBinding(KEYBINDINGS.HELP, goHelp);
 
 	return (
 		<Box flexDirection="column" gap={1}>
@@ -19,7 +31,8 @@ export default function PlayerLayout() {
 			>
 				<Text bold color={theme.colors.primary}>
 					YouTube Music CLI
-				</Text>{' '}
+				</Text>
+				<Text> </Text>
 				<Text color={theme.colors.dim}>v0.0.1</Text>
 			</Box>
 
@@ -27,27 +40,9 @@ export default function PlayerLayout() {
 
 			<PlayerControls />
 
-			{playerState.queue.length > 0 && (
-				<Box marginTop={1}>
-					<Text color={theme.colors.dim}>
-						Queue: {playerState.queuePosition + 1} / {playerState.queue.length}
-					</Text>
-					{playerState.repeat !== 'off' && (
-						<>
-							{' | '}
-							<Text color={theme.colors.accent}>
-								{playerState.repeat === 'one' ? 'Repeat One' : 'Repeat All'}
-							</Text>
-						</>
-					)}
-					{playerState.shuffle && (
-						<>
-							{' | '}
-							<Text color={theme.colors.accent}>Shuffle</Text>
-						</>
-					)}
-				</Box>
-			)}
+			<ProgressBar />
+
+			{playerState.queue.length > 0 && <QueueList />}
 
 			<Box
 				marginTop={1}

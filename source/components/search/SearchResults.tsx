@@ -1,9 +1,14 @@
 // Search results component
 import React from 'react';
 import {Box, Text} from 'ink';
-import type {SearchResult} from '../../types/youtube-music.types.ts';
+import type {SearchResult, Track} from '../../types/youtube-music.types.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
+import {useNavigation} from '../../hooks/useNavigation.ts';
+import {useKeyBinding} from '../../hooks/useKeyboard.ts';
+import {usePlayer} from '../../hooks/usePlayer.ts';
+import {KEYBINDINGS} from '../../utils/constants.ts';
 import {truncate} from '../../utils/format.ts';
+import {useCallback, useEffect} from 'react';
 
 type Props = {
 	results: SearchResult[];
@@ -12,10 +17,42 @@ type Props = {
 
 export default function SearchResults({results, selectedIndex}: Props) {
 	const {theme} = useTheme();
+	const {state: navState, dispatch} = useNavigation();
+	const {play} = usePlayer();
 
 	if (results.length === 0) {
 		return null;
 	}
+
+	// Navigate results with arrow keys
+	const navigateUp = useCallback(() => {
+		if (selectedIndex > 0) {
+			dispatch({category: 'SET_SELECTED_RESULT', index: selectedIndex - 1});
+		}
+	}, [selectedIndex, dispatch]);
+
+	const navigateDown = useCallback(() => {
+		if (selectedIndex < results.length - 1) {
+			dispatch({category: 'SET_SELECTED_RESULT', index: selectedIndex + 1});
+		}
+	}, [selectedIndex, results.length, dispatch]);
+
+	// Play selected result
+	const playSelected = useCallback(() => {
+		const selected = results[selectedIndex];
+		if (selected && selected.type === 'song') {
+			play(selected.data as Track);
+		}
+	}, [selectedIndex, results, play]);
+
+	useKeyBinding(KEYBINDINGS.UP, navigateUp);
+	useKeyBinding(KEYBINDINGS.DOWN, navigateDown);
+	useKeyBinding(KEYBINDINGS.SELECT, playSelected);
+
+	// Sync selected index with navigation state
+	useEffect(() => {
+		dispatch({category: 'SET_SELECTED_RESULT', index: selectedIndex});
+	}, [selectedIndex, dispatch]);
 
 	return (
 		<Box flexDirection="column" gap={1}>
@@ -24,7 +61,7 @@ export default function SearchResults({results, selectedIndex}: Props) {
 			</Text>
 
 			{results.map((result, index) => {
-				const isSelected = index === selectedIndex;
+				const isSelected = index === navState.selectedResult;
 				const data = result.data;
 
 				return (
@@ -38,7 +75,7 @@ export default function SearchResults({results, selectedIndex}: Props) {
 							color={isSelected ? theme.colors.primary : theme.colors.text}
 							bold={isSelected}
 						>
-							[{result.type.toUpperCase()}]{' '}
+							[{result.type.toUpperCase()}]<Text> </Text>
 						</Text>
 
 						{'title' in data ? (
@@ -59,6 +96,13 @@ export default function SearchResults({results, selectedIndex}: Props) {
 					</Box>
 				);
 			})}
+
+			{/* Instructions */}
+			<Box marginTop={1}>
+				<Text color={theme.colors.dim}>
+					Arrows to navigate, Enter to play song, Esc to go back
+				</Text>
+			</Box>
 		</Box>
 	);
 }

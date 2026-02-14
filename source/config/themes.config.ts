@@ -64,4 +64,4 @@ export const BUILTIN_THEMES: Record<string, Theme> = {
 	},
 };
 
-export const DEFAULT_THEME = BUILTIN_THEMES.dark;
+export const DEFAULT_THEME: Theme = BUILTIN_THEMES['dark'] as Theme;

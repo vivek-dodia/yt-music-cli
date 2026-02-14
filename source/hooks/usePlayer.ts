@@ -5,16 +5,23 @@ import {getConfigService} from '../services/config/config.service.ts';
 import {getMusicService} from '../services/youtube-music/api.ts';
 import type {Track} from '../types/youtube-music.types.ts';
 
+type AudioElement = {
+	play: () => Promise<void>;
+	pause: () => void;
+	seek: (time: number) => void;
+	setVolume: (volume: number) => void;
+};
+
 export function usePlayer() {
 	const {state, dispatch, ...playerStore} = usePlayerStore();
-	const audioRef = useRef<unknown | null>(null);
+	const audioRef = useRef<AudioElement | null>(null);
 	const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 	const musicService = getMusicService();
 
 	// Initialize audio on mount
 	useEffect(() => {
 		const config = getConfigService();
-		dispatch({type: 'SET_VOLUME', volume: config.get('volume')});
+		dispatch({category: 'SET_VOLUME', volume: config.get('volume')});
 
 		return () => {
 			if (progressIntervalRef.current) {
@@ -30,7 +37,7 @@ export function usePlayer() {
 		}
 
 		const loadAndPlayTrack = async () => {
-			dispatch({type: 'SET_LOADING', loading: true});
+			dispatch({category: 'SET_LOADING', loading: true});
 
 			try {
 				await musicService.getStreamUrl(state.currentTrack!.videoId);
@@ -60,7 +67,7 @@ export function usePlayer() {
 					},
 				};
 
-				dispatch({type: 'SET_LOADING', loading: false});
+				dispatch({category: 'SET_LOADING', loading: false});
 
 				// Start progress tracking
 				if (progressIntervalRef.current) {
@@ -68,13 +75,16 @@ export function usePlayer() {
 				}
 
 				progressIntervalRef.current = setInterval(() => {
-					dispatch({type: 'UPDATE_PROGRESS', progress: state.progress + 0.1});
+					dispatch({
+						category: 'UPDATE_PROGRESS',
+						progress: (state.progress ?? 0) + 0.1,
+					});
 				}, 100);
 
 				await audioRef.current.play();
 			} catch (error) {
 				dispatch({
-					type: 'SET_ERROR',
+					category: 'SET_ERROR',
 					error:
 						error instanceof Error ? error.message : 'Failed to load track',
 				});
@@ -118,7 +128,7 @@ export function usePlayer() {
 	useEffect(() => {
 		if (state.duration > 0 && state.progress >= state.duration) {
 			if (state.repeat === 'one') {
-				dispatch({type: 'SEEK', position: 0});
+				dispatch({category: 'SEEK', position: 0});
 			} else {
 				playerStore.next();
 			}
@@ -131,15 +141,15 @@ export function usePlayer() {
 			const isInQueue = state.queue.some(t => t.videoId === track.videoId);
 
 			if (!isInQueue) {
-				dispatch({type: 'ADD_TO_QUEUE', track});
+				dispatch({category: 'ADD_TO_QUEUE', track});
 			}
 
 			// Find position and play
 			const position = state.queue.findIndex(t => t.videoId === track.videoId);
 			if (position >= 0) {
-				dispatch({type: 'SET_QUEUE_POSITION', position});
+				dispatch({category: 'SET_QUEUE_POSITION', position});
 			} else {
-				dispatch({type: 'PLAY', track});
+				dispatch({category: 'PLAY', track});
 			}
 
 			// Add to history
