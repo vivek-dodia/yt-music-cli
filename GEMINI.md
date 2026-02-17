@@ -58,6 +58,7 @@ The project uses `bun` as the primary tool for development tasks.
 - **TUI Layouts**: Layouts use `Box` components from `ink` for flexbox-style positioning.
 - **State Reducers**: Complex state (like the player) is managed using the `useReducer` pattern in stores.
 - **API Singleton**: The `MusicService` is implemented as a singleton accessed via `getMusicService()`.
+- **Global Keyboard Management**: Keyboard shortcuts are centralized via the `KeyboardManager` component and `useKeyBinding` hook to prevent memory leaks (MaxListenersExceededWarning).
 
 ### Testing Practices
 

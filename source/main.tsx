@@ -5,6 +5,7 @@ import MainLayout from './components/layouts/MainLayout.tsx';
 import {ThemeProvider} from './contexts/theme.context.tsx';
 import {PlayerProvider} from './stores/player.store.tsx';
 import {ErrorBoundary} from './components/common/ErrorBoundary.tsx';
+import {KeyboardManager} from './hooks/useKeyboard.ts';
 import {Box} from 'ink';
 import type {Flags} from './types/cli.types.ts';
 import {useEffect} from 'react';
@@ -35,6 +36,7 @@ export default function Main({flags}: {flags?: Flags}) {
 					<PlayerProvider>
 						<NavigationProvider>
 							<>
+								<KeyboardManager />
 								<Initializer flags={flags} />
 								<MainLayout />
 							</>

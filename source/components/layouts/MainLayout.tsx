@@ -37,7 +37,12 @@ export default function MainLayout() {
 		dispatch({category: 'GO_BACK'});
 	}, [dispatch]);
 
+	const quit = React.useCallback(() => {
+		process.exit(0);
+	}, []);
+
 	// Global keyboard bindings
+	useKeyBinding(KEYBINDINGS.QUIT, quit);
 	useKeyBinding(KEYBINDINGS.SEARCH, goToSearch);
 	useKeyBinding(KEYBINDINGS.PLAYLISTS, goToPlaylists);
 	useKeyBinding(KEYBINDINGS.SUGGESTIONS, goToSuggestions);

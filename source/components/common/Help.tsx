@@ -28,7 +28,7 @@ export default function Help() {
 				</Text>
 				<Box paddingX={2}>
 					<Text>
-						<Text color={theme.colors.text}>q</Text> - Quit
+						<Text color={theme.colors.text}>q / Esc</Text> - Quit
 						<Text> | </Text>
 						<Text color={theme.colors.text}>?</Text> - Help
 						<Text> | </Text>

@@ -1,115 +1,100 @@
 // Keyboard input handling hook
-import {useEffect, useCallback} from 'react';
-import {useStdin} from 'ink';
+import {useCallback, useEffect} from 'react';
+import {useInput} from 'ink';
 
-type KeyHandler = (key: string, shift: boolean, ctrl: boolean) => void;
+type KeyHandler = () => void;
+type RegistryEntry = {
+	keys: readonly string[];
+	handler: KeyHandler;
+};
 
-type KeyBindingMap = Record<string, KeyHandler>;
+// Global registry for key handlers
+const registry: Set<RegistryEntry> = new Set();
 
-export function useKeyboard(bindings: KeyBindingMap): void {
-	const {stdin, setRawMode} = useStdin();
-
-	useEffect(() => {
-		setRawMode(true);
-
-		const handleData = (data: Buffer) => {
-			// Parse key input
-			const str = data.toString();
-
-			// Handle special keys
-			if (str === '\u0003') {
-				// Ctrl+C - handle quit
-				bindings['ctrl+c']?.('', false, true);
-				return;
-			}
-
-			if (str === '\u001b[C') {
-				// Arrow up
-				bindings['up']?.('up', false, false);
-				return;
-			}
-
-			if (str === '\u001b[B') {
-				// Arrow down
-				bindings['down']?.('down', false, false);
-				return;
-			}
-
-			if (str === '\u001b[D') {
-				// Arrow right
-				bindings['right']?.('right', false, false);
-				return;
-			}
-
-			if (str === '\u001b[A') {
-				// Arrow left
-				bindings['left']?.('left', false, false);
-				return;
-			}
-
-			if (str.startsWith('\u001b')) {
-				// Other escape sequences
-				return;
-			}
-
-			// Regular keys
-			const key = str.toLowerCase();
-			const shift = str !== str.toLowerCase();
-			const ctrl = str.length === 1 && str.charCodeAt(0) < 32;
-
-			bindings[key]?.(key, shift, ctrl);
-		};
-
-		stdin.on('data', handleData);
-
-		return () => {
-			stdin.removeListener('data', handleData);
-			setRawMode(false);
-		};
-	}, [stdin, setRawMode, bindings]);
-}
-
+/**
+ * Hook to bind keyboard shortcuts.
+ * This uses a centralized manager to avoid multiple useInput calls and memory leaks.
+ */
 export function useKeyBinding(
 	keys: readonly string[],
 	handler: () => void,
 ): void {
 	const memoizedHandler = useCallback(handler, [handler]);
 
-	useKeyboard({
-		...Object.fromEntries(
-			keys.flatMap(key => {
-				const bindings = parseKeyBinding(key);
-				return bindings.map(k => [k, memoizedHandler]);
-			}),
-		),
-	});
+	useEffect(() => {
+		const entry: RegistryEntry = {keys, handler: memoizedHandler};
+		registry.add(entry);
+
+		return () => {
+			registry.delete(entry);
+		};
+	}, [keys, memoizedHandler]);
 }
 
-function parseKeyBinding(binding: string): string[] {
-	const keys: string[] = [];
-
-	const parts = binding.split('+');
-
-	if (parts.includes('shift') && parts.includes('right')) {
-		keys.push('right');
-	}
-
-	if (parts.includes('shift') && parts.includes('left')) {
-		keys.push('left');
-	}
-
-	if (parts.includes('ctrl') && parts.length > 1) {
-		keys.push(`ctrl+${parts[parts.length - 1]}`);
-	}
-
-	if (parts.length === 1) {
-		const key = parts[0]!.toLowerCase();
-		if (key === 'up' || key === 'down' || key === 'left' || key === 'right') {
-			keys.push(key);
-		} else if (key.length === 1) {
-			keys.push(key);
+/**
+ * Global Keyboard Manager Component
+ * This should be rendered once at the root of the app.
+ */
+export function KeyboardManager() {
+	useInput((input, key) => {
+		// Global quit handling (Ctrl+C is handled by Ink/Node by default, but we can be explicit)
+		if (key.ctrl && input === 'c') {
+			process.exit(0);
 		}
-	}
 
-	return keys;
+		// Dispatch to all registered handlers
+		for (const entry of registry) {
+			const {keys, handler} = entry;
+
+			for (const binding of keys) {
+				const lowerBinding = binding.toLowerCase();
+
+				// Handle special keys
+				const isMatch =
+					(lowerBinding === 'escape' && key.escape) ||
+					((lowerBinding === 'return' || lowerBinding === 'enter') && key.return) ||
+					(lowerBinding === 'backspace' && key.backspace) ||
+					(lowerBinding === 'tab' && key.tab) ||
+					(lowerBinding === 'up' && key.upArrow) ||
+					(lowerBinding === 'down' && key.downArrow) ||
+					(lowerBinding === 'left' && key.leftArrow) ||
+					(lowerBinding === 'right' && key.rightArrow) ||
+					(lowerBinding === 'pageup' && key.pageUp) ||
+					(lowerBinding === 'pagedown' && key.pageDown) ||
+					// Handle combinations
+					(() => {
+						const parts = lowerBinding.split('+');
+						const hasCtrl = parts.includes('ctrl');
+						const hasMeta = parts.includes('meta') || parts.includes('alt');
+						const hasShift = parts.includes('shift');
+						const mainKey = parts[parts.length - 1];
+
+						if (hasCtrl && !key.ctrl) return false;
+						if (hasMeta && !key.meta) return false;
+						if (hasShift && !key.shift) return false;
+
+						// Check the actual key
+						if (mainKey === 'up' && key.upArrow) return true;
+						if (mainKey === 'down' && key.downArrow) return true;
+						if (mainKey === 'left' && key.leftArrow) return true;
+						if (mainKey === 'right' && key.rightArrow) return true;
+
+						return input.toLowerCase() === mainKey && !key.ctrl && !key.meta;
+					})();
+
+				if (isMatch) {
+					handler();
+					// We don't break here because multiple handlers might want to react
+					// but usually only one does.
+				}
+			}
+		}
+	});
+
+	return null;
+}
+
+// Deprecated in favor of useKeyBinding
+export function useKeyboard(_bindings: Record<string, any>): void {
+	// This is kept for compatibility but should be replaced
 }
