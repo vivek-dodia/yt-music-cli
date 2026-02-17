@@ -16,6 +16,8 @@ import {VIEW} from './utils/constants.ts';
 
 function Initializer({flags}: {flags?: Flags}) {
 	const {dispatch} = useNavigation();
+	const {play} = usePlayer();
+	const {getTrack, getPlaylist} = useYouTubeMusic();
 
 	useEffect(() => {
 		if (flags?.showSuggestions) {
@@ -23,9 +25,20 @@ function Initializer({flags}: {flags?: Flags}) {
 		} else if (flags?.searchQuery) {
 			dispatch({category: 'NAVIGATE', view: VIEW.SEARCH});
 			dispatch({category: 'SET_SEARCH_QUERY', query: flags.searchQuery});
+		} else if (flags?.playTrack) {
+			void getTrack(flags.playTrack).then(track => {
+				if (track) play(track);
+			});
+		} else if (flags?.playPlaylist) {
+			dispatch({category: 'NAVIGATE', view: VIEW.PLAYLISTS});
+			void getPlaylist(flags.playPlaylist).then(playlist => {
+				// For now just navigate, but we could auto-play
+				if (playlist) {
+					dispatch({category: 'SET_SELECTED_PLAYLIST', index: 0});
+				}
+			});
 		}
-		// Handle other flags...
-	}, [flags, dispatch]);
+	}, [flags, dispatch, play, getTrack, getPlaylist]);
 
 	return null;
 }
