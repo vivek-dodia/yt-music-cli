@@ -1,3 +1,9 @@
+## [0.0.17](https://github.com/involvex/youtube-music-cli/compare/v0.0.16...v0.0.17) (2026-02-18)
+
+### Features
+
+- **ui:** add playback mode and repeat indicators ([bc499a2](https://github.com/involvex/youtube-music-cli/commit/bc499a2083063d3bda3d4b1b1f1a85d620be9fd1))
+
 ## [0.0.16](https://github.com/involvex/youtube-music-cli/compare/v0.0.15...v0.0.16) (2026-02-18)
 
 ### Bug Fixes
