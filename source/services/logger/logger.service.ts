@@ -44,16 +44,19 @@ class Logger {
 
 	info(category: string, message: string, data?: unknown) {
 		this.writeToFile('INFO', category, message, data);
-		console.log(`[${category}] ${message}`);
+		// Disabled: console.log causes Ink to re-render constantly
+		// console.log(`[${category}] ${message}`);
 	}
 
 	warn(category: string, message: string, data?: unknown) {
 		this.writeToFile('WARN', category, message, data);
-		console.warn(`[${category}] ${message}`);
+		// Disabled: console.warn causes Ink to re-render
+		// console.warn(`[${category}] ${message}`);
 	}
 
 	error(category: string, message: string, data?: unknown) {
 		this.writeToFile('ERROR', category, message, data);
+		// Keep console.error for critical errors, but this should be rare
 		console.error(`[${category}] ${message}`);
 	}
 

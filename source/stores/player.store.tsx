@@ -519,11 +519,13 @@ export function PlayerProvider({children}: {children: ReactNode}) {
 			seek: (position: number) => dispatch({category: 'SEEK', position}),
 			setVolume: (volume: number) => dispatch({category: 'SET_VOLUME', volume}),
 			volumeUp: () => {
+				process.stderr.write('[PlayerActions] volumeUp() called\n');
 				logger.debug('PlayerActions', 'volumeUp called');
 				dispatch({category: 'VOLUME_UP'});
 			},
 			volumeDown: () => {
-				logger.debug('PlayerActions', 'volumeUp called');
+				process.stderr.write('[PlayerActions] volumeDown() called\n');
+				logger.debug('PlayerActions', 'volumeDown called');
 				dispatch({category: 'VOLUME_DOWN'});
 			},
 			toggleShuffle: () => dispatch({category: 'TOGGLE_SHUFFLE'}),

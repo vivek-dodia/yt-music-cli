@@ -30,12 +30,12 @@ export default function PlayerControls() {
 		volumeDown,
 	} = usePlayer();
 
-	// Log when callbacks change (detect instability)
+	// DEBUG: Log when callbacks change (detect instability)
 	useEffect(() => {
-		logger.debug('PlayerControls', 'volumeUp callback changed', {
-			instanceId,
-			callbackRef: volumeUp.toString().slice(0, 50),
-		});
+		// Temporarily output to stderr to debug without triggering Ink re-render
+		process.stderr.write(
+			`[PlayerControls] volumeUp callback: ${typeof volumeUp}\n`,
+		);
 	}, [volumeUp, instanceId]);
 
 	const handlePlayPause = () => {

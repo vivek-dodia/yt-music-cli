@@ -38,6 +38,11 @@ export function useKeyBinding(
  */
 export function KeyboardManager() {
 	useInput((input, key) => {
+		// DEBUG: Log volume key presses specifically
+		if (input === '+' || input === '-') {
+			process.stderr.write(`[KeyboardManager] Volume key pressed: ${input}\n`);
+		}
+
 		// Debug logging for key presses (helps diagnose binding issues)
 		if (input || key.ctrl || key.meta || key.shift) {
 			logger.debug('KeyboardManager', 'Key pressed', {
