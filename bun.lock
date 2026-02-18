@@ -23,6 +23,7 @@
       "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@sindresorhus/tsconfig": "^8.1.0",
+        "@types/node": "^25.2.3",
         "@types/node-notifier": "^8.0.5",
         "@types/react": "^19.2.14",
         "@vdemedes/prettier-config": "^2.0.1",

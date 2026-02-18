@@ -4,7 +4,8 @@
 		"outDir": "dist",
 		"allowImportingTsExtensions": true,
 		"rewriteRelativeImportExtensions": true,
-		"jsx": "react-jsx"
+		"jsx": "react-jsx",
+		"types": ["node"]
 	},
 	"include": ["source", "test.tsx", "eslint.config.ts"]
 }
