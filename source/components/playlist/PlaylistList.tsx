@@ -9,11 +9,13 @@ import {usePlaylist} from '../../hooks/usePlaylist.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import {useKeyboardBlocker} from '../../hooks/useKeyboardBlocker.tsx';
 import {KEYBINDINGS} from '../../utils/constants.ts';
+import {getDownloadService} from '../../services/download/download.service.ts';
 
 export default function PlaylistList() {
 	const {theme} = useTheme();
 	const {play, setQueue} = usePlayer();
 	const {dispatch} = useNavigation();
+	const downloadService = getDownloadService();
 	const {playlists, createPlaylist, renamePlaylist, deletePlaylist} =
 		usePlaylist();
 	const [selectedIndex, setSelectedIndex] = useState(0);
@@ -22,6 +24,7 @@ export default function PlaylistList() {
 		null,
 	);
 	const [renameValue, setRenameValue] = useState('');
+	const [downloadStatus, setDownloadStatus] = useState<string | null>(null);
 	useKeyboardBlocker(renamingPlaylistId !== null);
 
 	const handleCreate = useCallback(() => {
@@ -86,6 +89,40 @@ export default function PlaylistList() {
 		setSelectedIndex(prev => Math.max(0, prev - 1));
 	}, [deletePlaylist, playlists, renamingPlaylistId, selectedIndex]);
 
+	const handleDownload = useCallback(async () => {
+		if (renamingPlaylistId) return;
+		const playlist = playlists[selectedIndex];
+		if (!playlist) return;
+
+		const config = downloadService.getConfig();
+		if (!config.enabled) {
+			setDownloadStatus(
+				'Downloads are disabled. Enable Download Feature in Settings.',
+			);
+			return;
+		}
+
+		const target = downloadService.resolvePlaylistTarget(playlist);
+		if (target.tracks.length === 0) {
+			setDownloadStatus(`No tracks to download in "${playlist.name}".`);
+			return;
+		}
+
+		setDownloadStatus(
+			`Downloading ${target.tracks.length} track(s) from "${playlist.name}"...`,
+		);
+		try {
+			const summary = await downloadService.downloadTracks(target.tracks);
+			setDownloadStatus(
+				`Downloaded ${summary.downloaded}, skipped ${summary.skipped}, failed ${summary.failed}.`,
+			);
+		} catch (error) {
+			setDownloadStatus(
+				error instanceof Error ? error.message : 'Failed to download playlist.',
+			);
+		}
+	}, [downloadService, playlists, renamingPlaylistId, selectedIndex]);
+
 	useKeyBinding(KEYBINDINGS.UP, navigateUp);
 	useKeyBinding(KEYBINDINGS.DOWN, navigateDown);
 	useKeyBinding(KEYBINDINGS.SELECT, startPlaylist);
@@ -93,6 +130,9 @@ export default function PlaylistList() {
 	useKeyBinding(KEYBINDINGS.CREATE_PLAYLIST, handleCreate);
 	useKeyBinding(KEYBINDINGS.DELETE_PLAYLIST, handleDelete);
 	useKeyBinding(KEYBINDINGS.BACK, handleBack);
+	useKeyBinding(KEYBINDINGS.DOWNLOAD, () => {
+		void handleDownload();
+	});
 
 	return (
 		<Box flexDirection="column" gap={1}>
@@ -167,11 +207,15 @@ export default function PlaylistList() {
 					<Text color={theme.colors.text}>Enter</Text> to play |{' '}
 					<Text color={theme.colors.text}>r</Text> rename |{' '}
 					<Text color={theme.colors.text}>c</Text> create |{' '}
+					<Text color={theme.colors.text}>Shift+D</Text> download |{' '}
 					<Text color={theme.colors.text}>D</Text> delete |{' '}
 					<Text color={theme.colors.text}>Esc</Text> back
 				</Text>
 				{lastCreated && (
 					<Text color={theme.colors.accent}> Created {lastCreated}</Text>
+				)}
+				{downloadStatus && (
+					<Text color={theme.colors.accent}>{downloadStatus}</Text>
 				)}
 			</Box>
 		</Box>

@@ -50,6 +50,7 @@ export default function ShortcutsBar() {
 				<Text color={theme.colors.text}>→</Text> Next |{' '}
 				<Text color={theme.colors.text}>←</Text> Prev |{' '}
 				<Text color={theme.colors.text}>Shift+P</Text> Playlists |{' '}
+				<Text color={theme.colors.text}>Shift+D</Text> Download |{' '}
 				<Text color={theme.colors.text}>m</Text> Mix |{' '}
 				<Text color={theme.colors.text}>M</Text> Mini |{' '}
 				<Text color={theme.colors.text}>/</Text> Search |{' '}

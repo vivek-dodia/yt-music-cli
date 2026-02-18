@@ -169,11 +169,70 @@ class MusicService {
 	}
 
 	async getPlaylist(playlistId: string): Promise<Playlist> {
-		return {
-			playlistId,
-			name: 'Unknown Playlist',
-			tracks: [],
-		};
+		try {
+			const yt = await getClient();
+			const playlistData = (await yt.music.getPlaylist(playlistId)) as {
+				title?: string;
+				name?: string;
+				contents?: Array<{
+					id?: string;
+					video_id?: string;
+					title?: string | {text?: string};
+					artists?: Array<{name?: string; channel_id?: string; id?: string}>;
+					duration?: number | {seconds?: number};
+				}>;
+				tracks?: Array<{
+					id?: string;
+					video_id?: string;
+					title?: string | {text?: string};
+					artists?: Array<{name?: string; channel_id?: string; id?: string}>;
+					duration?: number | {seconds?: number};
+				}>;
+			};
+
+			const rows = [
+				...(playlistData.contents ?? []),
+				...(playlistData.tracks ?? []),
+			];
+			const seen = new Set<string>();
+			const tracks: Track[] = [];
+
+			for (const row of rows) {
+				const videoId = row.id || row.video_id;
+				if (!videoId || seen.has(videoId)) continue;
+				seen.add(videoId);
+				tracks.push({
+					videoId,
+					title:
+						(typeof row.title === 'string' ? row.title : row.title?.text) ??
+						'Unknown',
+					artists: (row.artists ?? []).map(artist => ({
+						artistId: artist.channel_id || artist.id || '',
+						name: artist.name ?? 'Unknown',
+					})),
+					duration:
+						typeof row.duration === 'number'
+							? row.duration
+							: (row.duration?.seconds ?? 0),
+				});
+			}
+
+			return {
+				playlistId,
+				name: playlistData.title || playlistData.name || 'Unknown Playlist',
+				tracks,
+			};
+		} catch (error) {
+			logger.error('MusicService', 'getPlaylist failed', {
+				playlistId,
+				error: error instanceof Error ? error.message : String(error),
+			});
+			return {
+				playlistId,
+				name: 'Unknown Playlist',
+				tracks: [],
+			};
+		}
 	}
 
 	async getTrending(): Promise<Track[]> {

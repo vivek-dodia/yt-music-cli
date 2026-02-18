@@ -1,6 +1,7 @@
 // Settings component
 import {useState} from 'react';
 import {Box, Text} from 'ink';
+import TextInput from 'ink-text-input';
 import {useTheme} from '../../hooks/useTheme.ts';
 import {useNavigation} from '../../hooks/useNavigation.ts';
 import {getConfigService} from '../../services/config/config.service.ts';
@@ -8,14 +9,20 @@ import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {useSleepTimer} from '../../hooks/useSleepTimer.ts';
 import {formatTime} from '../../utils/format.ts';
+import {useKeyboardBlocker} from '../../hooks/useKeyboardBlocker.tsx';
+import type {DownloadFormat} from '../../types/config.types.ts';
 
 const QUALITIES: Array<'low' | 'medium' | 'high'> = ['low', 'medium', 'high'];
+const DOWNLOAD_FORMATS: DownloadFormat[] = ['mp3', 'm4a'];
 
 const SETTINGS_ITEMS = [
 	'Stream Quality',
 	'Audio Normalization',
 	'Notifications',
 	'Discord Rich Presence',
+	'Downloads Enabled',
+	'Download Folder',
+	'Download Format',
 	'Sleep Timer',
 	'Custom Keybindings',
 	'Manage Plugins',
@@ -36,6 +43,17 @@ export default function Settings() {
 	const [discordRpc, setDiscordRpc] = useState(
 		config.get('discordRichPresence') ?? false,
 	);
+	const [downloadsEnabled, setDownloadsEnabled] = useState(
+		config.get('downloadsEnabled') ?? false,
+	);
+	const [downloadDirectory, setDownloadDirectory] = useState(
+		config.get('downloadDirectory') ?? '',
+	);
+	const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>(
+		config.get('downloadFormat') ?? 'mp3',
+	);
+	const [isEditingDownloadDirectory, setIsEditingDownloadDirectory] =
+		useState(false);
 	const {
 		isActive,
 		activeMinutes,
@@ -44,6 +62,7 @@ export default function Settings() {
 		cancelTimer,
 		presets,
 	} = useSleepTimer();
+	useKeyboardBlocker(isEditingDownloadDirectory);
 
 	const navigateUp = () => {
 		setSelectedIndex(prev => Math.max(0, prev - 1));
@@ -78,6 +97,20 @@ export default function Settings() {
 		config.set('discordRichPresence', next);
 	};
 
+	const toggleDownloadsEnabled = () => {
+		const next = !downloadsEnabled;
+		setDownloadsEnabled(next);
+		config.set('downloadsEnabled', next);
+	};
+
+	const cycleDownloadFormat = () => {
+		const currentIndex = DOWNLOAD_FORMATS.indexOf(downloadFormat);
+		const nextFormat =
+			DOWNLOAD_FORMATS[(currentIndex + 1) % DOWNLOAD_FORMATS.length]!;
+		setDownloadFormat(nextFormat);
+		config.set('downloadFormat', nextFormat);
+	};
+
 	const cycleSleepTimer = () => {
 		if (isActive) {
 			cancelTimer();
@@ -101,10 +134,16 @@ export default function Settings() {
 		} else if (selectedIndex === 3) {
 			toggleDiscordRpc();
 		} else if (selectedIndex === 4) {
-			cycleSleepTimer();
+			toggleDownloadsEnabled();
 		} else if (selectedIndex === 5) {
-			dispatch({category: 'NAVIGATE', view: VIEW.KEYBINDINGS});
+			setIsEditingDownloadDirectory(true);
 		} else if (selectedIndex === 6) {
+			cycleDownloadFormat();
+		} else if (selectedIndex === 7) {
+			cycleSleepTimer();
+		} else if (selectedIndex === 8) {
+			dispatch({category: 'NAVIGATE', view: VIEW.KEYBINDINGS});
+		} else if (selectedIndex === 9) {
 			dispatch({category: 'NAVIGATE', view: VIEW.PLUGINS});
 		}
 	};
@@ -191,41 +230,57 @@ export default function Settings() {
 				</Text>
 			</Box>
 
-			{/* Sleep Timer */}
+			{/* Downloads Enabled */}
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
 						selectedIndex === 4 ? theme.colors.primary : undefined
 					}
 					color={
-						selectedIndex === 4
-							? theme.colors.background
-							: isActive
-								? theme.colors.accent
-								: theme.colors.text
+						selectedIndex === 4 ? theme.colors.background : theme.colors.text
 					}
 					bold={selectedIndex === 4}
 				>
-					{sleepTimerLabel}
+					Download Feature: {downloadsEnabled ? 'ON' : 'OFF'}
 				</Text>
 			</Box>
 
-			{/* Custom Keybindings */}
+			{/* Download Folder */}
 			<Box paddingX={1}>
-				<Text
-					backgroundColor={
-						selectedIndex === 5 ? theme.colors.primary : undefined
-					}
-					color={
-						selectedIndex === 5 ? theme.colors.background : theme.colors.text
-					}
-					bold={selectedIndex === 5}
-				>
-					Custom Keybindings →
-				</Text>
+				{isEditingDownloadDirectory && selectedIndex === 5 ? (
+					<TextInput
+						value={downloadDirectory}
+						onChange={setDownloadDirectory}
+						onSubmit={value => {
+							const normalized = value.trim();
+							if (!normalized) {
+								setDownloadDirectory(config.get('downloadDirectory') ?? '');
+								setIsEditingDownloadDirectory(false);
+								return;
+							}
+							setDownloadDirectory(normalized);
+							config.set('downloadDirectory', normalized);
+							setIsEditingDownloadDirectory(false);
+						}}
+						placeholder="Download directory"
+						focus
+					/>
+				) : (
+					<Text
+						backgroundColor={
+							selectedIndex === 5 ? theme.colors.primary : undefined
+						}
+						color={
+							selectedIndex === 5 ? theme.colors.background : theme.colors.text
+						}
+						bold={selectedIndex === 5}
+					>
+						Download Folder: {downloadDirectory}
+					</Text>
+				)}
 			</Box>
 
-			{/* Manage Plugins */}
+			{/* Download Format */}
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
@@ -235,6 +290,55 @@ export default function Settings() {
 						selectedIndex === 6 ? theme.colors.background : theme.colors.text
 					}
 					bold={selectedIndex === 6}
+				>
+					Download Format: {downloadFormat.toUpperCase()}
+				</Text>
+			</Box>
+
+			{/* Sleep Timer */}
+			<Box paddingX={1}>
+				<Text
+					backgroundColor={
+						selectedIndex === 7 ? theme.colors.primary : undefined
+					}
+					color={
+						selectedIndex === 7
+							? theme.colors.background
+							: isActive
+								? theme.colors.accent
+								: theme.colors.text
+					}
+					bold={selectedIndex === 7}
+				>
+					{sleepTimerLabel}
+				</Text>
+			</Box>
+
+			{/* Custom Keybindings */}
+			<Box paddingX={1}>
+				<Text
+					backgroundColor={
+						selectedIndex === 8 ? theme.colors.primary : undefined
+					}
+					color={
+						selectedIndex === 8 ? theme.colors.background : theme.colors.text
+					}
+					bold={selectedIndex === 8}
+				>
+					Custom Keybindings →
+				</Text>
+			</Box>
+
+			{/* Manage Plugins */}
+			<Box paddingX={1}>
+				<Text
+					backgroundColor={
+						selectedIndex === 9 ? theme.colors.primary : undefined
+					}
+					color={
+						selectedIndex === 9 ? theme.colors.background : theme.colors.text
+					}
+					bold={selectedIndex === 9}
 				>
 					Manage Plugins
 				</Text>

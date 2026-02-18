@@ -92,6 +92,8 @@ export default function Help() {
 						<Text> | </Text>
 						<Text color={theme.colors.text}>m</Text> - Create Mix Playlist
 						<Text> | </Text>
+						<Text color={theme.colors.text}>Shift+D</Text> - Download selection
+						<Text> | </Text>
 						<Text color={theme.colors.text}>Esc</Text> - Clear Search
 						<Text> | </Text>
 						<Text color={theme.colors.text}>[ / ]</Text> - Results Limit
@@ -109,6 +111,8 @@ export default function Help() {
 						<Text color={theme.colors.text}>d</Text> - Remove from Playlist
 						<Text> | </Text>
 						<Text color={theme.colors.text}>c</Text> - Create Playlist
+						<Text> | </Text>
+						<Text color={theme.colors.text}>Shift+D</Text> - Download Playlist
 						<Text> | </Text>
 						<Text color={theme.colors.text}>D</Text> - Delete Playlist
 					</Text>

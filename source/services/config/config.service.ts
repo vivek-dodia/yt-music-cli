@@ -4,6 +4,7 @@ import {mkdirSync, readFileSync, writeFileSync, existsSync} from 'node:fs';
 import type {Config} from '../../types/config.types.ts';
 import {BUILTIN_THEMES, DEFAULT_THEME} from '../../config/themes.config.ts';
 import type {Theme} from '../../types/theme.types.ts';
+import path from 'node:path';
 
 class ConfigService {
 	private configPath: string;
@@ -32,6 +33,9 @@ class ConfigService {
 			audioNormalization: false,
 			notifications: false,
 			discordRichPresence: false,
+			downloadsEnabled: false,
+			downloadDirectory: path.join(CONFIG_DIR, 'downloads'),
+			downloadFormat: 'mp3',
 		};
 	}
 

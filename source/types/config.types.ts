@@ -3,6 +3,7 @@ import type {Playlist} from './youtube-music.types.ts';
 import type {Theme} from './theme.types.ts';
 
 export type RepeatMode = 'off' | 'all' | 'one';
+export type DownloadFormat = 'mp3' | 'm4a';
 
 export interface KeybindingConfig {
 	keys: string[];
@@ -43,4 +44,7 @@ export interface Config {
 	};
 	discordRichPresence?: boolean;
 	proxy?: string;
+	downloadsEnabled?: boolean;
+	downloadDirectory?: string;
+	downloadFormat?: DownloadFormat;
 }

@@ -13,6 +13,7 @@ import {useCallback, useRef, useEffect} from 'react';
 import {logger} from '../../services/logger/logger.service.ts';
 import {useTerminalSize} from '../../hooks/useTerminalSize.ts';
 import {getMusicService} from '../../services/youtube-music/api.ts';
+import {getDownloadService} from '../../services/download/download.service.ts';
 
 // Generate unique component instance ID
 let instanceCounter = 0;
@@ -22,6 +23,7 @@ type Props = {
 	selectedIndex: number;
 	isActive?: boolean;
 	onMixCreated?: (message: string) => void;
+	onDownloadStatus?: (message: string) => void;
 };
 
 function SearchResults({
@@ -29,15 +31,19 @@ function SearchResults({
 	selectedIndex,
 	isActive = true,
 	onMixCreated,
+	onDownloadStatus,
 }: Props) {
 	const {theme} = useTheme();
 	const {dispatch} = useNavigation();
 	const {play, dispatch: playerDispatch} = usePlayer();
 	const {columns} = useTerminalSize();
 	const musicService = getMusicService();
+	const downloadService = getDownloadService();
 	const {createPlaylist} = usePlaylist();
 	const mixCreatedRef = useRef<Props['onMixCreated']>(onMixCreated);
 	mixCreatedRef.current = onMixCreated;
+	const downloadStatusRef = useRef<Props['onDownloadStatus']>(onDownloadStatus);
+	downloadStatusRef.current = onDownloadStatus;
 
 	// Track component instance and last action time for debouncing
 	const instanceIdRef = useRef(++instanceCounter);
@@ -258,11 +264,48 @@ function SearchResults({
 		selectedIndex,
 	]);
 
+	const downloadSelected = useCallback(async () => {
+		if (!isActive) return;
+		const selected = results[selectedIndex];
+		if (!selected) return;
+
+		const config = downloadService.getConfig();
+		if (!config.enabled) {
+			downloadStatusRef.current?.(
+				'Downloads are disabled. Enable Download Feature in Settings.',
+			);
+			return;
+		}
+
+		try {
+			const target = await downloadService.resolveSearchTarget(selected);
+			if (target.tracks.length === 0) {
+				downloadStatusRef.current?.(`No tracks found for "${target.name}".`);
+				return;
+			}
+
+			downloadStatusRef.current?.(
+				`Downloading ${target.tracks.length} track(s) from "${target.name}"...`,
+			);
+			const summary = await downloadService.downloadTracks(target.tracks);
+			downloadStatusRef.current?.(
+				`Downloaded ${summary.downloaded}, skipped ${summary.skipped}, failed ${summary.failed}.`,
+			);
+		} catch (error) {
+			downloadStatusRef.current?.(
+				error instanceof Error ? error.message : 'Download failed.',
+			);
+		}
+	}, [downloadService, isActive, results, selectedIndex]);
+
 	useKeyBinding(KEYBINDINGS.UP, navigateUp);
 	useKeyBinding(KEYBINDINGS.DOWN, navigateDown);
 	useKeyBinding(KEYBINDINGS.SELECT, handleSelect);
 	useKeyBinding(KEYBINDINGS.CREATE_MIX, () => {
 		void createMixPlaylist();
+	});
+	useKeyBinding(KEYBINDINGS.DOWNLOAD, () => {
+		void downloadSelected();
 	});
 
 	// Note: Removed redundant useEffect that was syncing selectedIndex to dispatch

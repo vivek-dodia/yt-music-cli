@@ -18,8 +18,8 @@ function SearchLayout() {
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [isTyping, setIsTyping] = useState(true);
 	const [isSearching, setIsSearching] = useState(false);
-	const [mixMessage, setMixMessage] = useState<string | null>(null);
-	const mixTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const [actionMessage, setActionMessage] = useState<string | null>(null);
+	const actionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	// Handle search action
 	const performSearch = useCallback(
@@ -88,20 +88,31 @@ function SearchLayout() {
 	useKeyBinding(KEYBINDINGS.BACK, goBack);
 
 	const handleMixCreated = useCallback((message: string) => {
-		setMixMessage(message);
-		if (mixTimeoutRef.current) {
-			clearTimeout(mixTimeoutRef.current);
+		setActionMessage(message);
+		if (actionTimeoutRef.current) {
+			clearTimeout(actionTimeoutRef.current);
 		}
-		mixTimeoutRef.current = setTimeout(() => {
-			setMixMessage(null);
-			mixTimeoutRef.current = null;
+		actionTimeoutRef.current = setTimeout(() => {
+			setActionMessage(null);
+			actionTimeoutRef.current = null;
+		}, 4000);
+	}, []);
+
+	const handleDownloadStatus = useCallback((message: string) => {
+		setActionMessage(message);
+		if (actionTimeoutRef.current) {
+			clearTimeout(actionTimeoutRef.current);
+		}
+		actionTimeoutRef.current = setTimeout(() => {
+			setActionMessage(null);
+			actionTimeoutRef.current = null;
 		}, 4000);
 	}, []);
 
 	useEffect(() => {
 		return () => {
-			if (mixTimeoutRef.current) {
-				clearTimeout(mixTimeoutRef.current);
+			if (actionTimeoutRef.current) {
+				clearTimeout(actionTimeoutRef.current);
 			}
 		};
 	}, []);
@@ -154,6 +165,7 @@ function SearchLayout() {
 					selectedIndex={navState.selectedResult}
 					isActive={!isTyping}
 					onMixCreated={handleMixCreated}
+					onDownloadStatus={handleDownloadStatus}
 				/>
 			)}
 
@@ -163,11 +175,13 @@ function SearchLayout() {
 			)}
 
 			{/* Instructions */}
-			{mixMessage && <Text color={theme.colors.accent}>{mixMessage}</Text>}
+			{actionMessage && (
+				<Text color={theme.colors.accent}>{actionMessage}</Text>
+			)}
 			<Text color={theme.colors.dim}>
 				{isTyping
 					? 'Type to search, Enter to start, Esc to clear'
-					: `Arrows to navigate, Enter to play, M to create mix, ]/[ more/fewer results (${navState.searchLimit}), H for history, Esc to type`}
+					: `Arrows to navigate, Enter to play, M mix, Shift+D download, ]/[ more/fewer results (${navState.searchLimit}), H history, Esc to type`}
 			</Text>
 		</Box>
 	);

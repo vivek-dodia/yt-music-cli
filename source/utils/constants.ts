@@ -83,6 +83,7 @@ export const KEYBINDINGS = {
 	CREATE_PLAYLIST: ['c'],
 	CREATE_MIX: ['m'],
 	DELETE_PLAYLIST: ['D'],
+	DOWNLOAD: ['shift+d'],
 } as const;
 
 // Default volume
