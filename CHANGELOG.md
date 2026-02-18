@@ -1,3 +1,9 @@
+## [0.0.8](https://github.com/involvex/youtube-music-cli/compare/v0.0.7...v0.0.8) (2026-02-18)
+
+### Features
+
+- **ui:** add keyboard blocker to search bar ([ee533fe](https://github.com/involvex/youtube-music-cli/commit/ee533fe716a203d432170e36149389f5bd48d687))
+
 ## [0.0.7](https://github.com/involvex/youtube-music-cli/compare/v0.0.6...v0.0.7) (2026-02-18)
 
 ### Features
