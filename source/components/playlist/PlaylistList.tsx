@@ -25,6 +25,7 @@ export default function PlaylistList() {
 	);
 	const [renameValue, setRenameValue] = useState('');
 	const [downloadStatus, setDownloadStatus] = useState<string | null>(null);
+	const [isDownloading, setIsDownloading] = useState(false);
 	useKeyboardBlocker(renamingPlaylistId !== null);
 
 	const handleCreate = useCallback(() => {
@@ -91,6 +92,10 @@ export default function PlaylistList() {
 
 	const handleDownload = useCallback(async () => {
 		if (renamingPlaylistId) return;
+		if (isDownloading) {
+			setDownloadStatus('Download already in progress. Please wait.');
+			return;
+		}
 		const playlist = playlists[selectedIndex];
 		if (!playlist) return;
 
@@ -109,9 +114,10 @@ export default function PlaylistList() {
 		}
 
 		setDownloadStatus(
-			`Downloading ${target.tracks.length} track(s) from "${playlist.name}"...`,
+			`Downloading ${target.tracks.length} track(s) from "${playlist.name}"... this can take a few minutes.`,
 		);
 		try {
+			setIsDownloading(true);
 			const summary = await downloadService.downloadTracks(target.tracks);
 			setDownloadStatus(
 				`Downloaded ${summary.downloaded}, skipped ${summary.skipped}, failed ${summary.failed}.`,
@@ -120,8 +126,16 @@ export default function PlaylistList() {
 			setDownloadStatus(
 				error instanceof Error ? error.message : 'Failed to download playlist.',
 			);
+		} finally {
+			setIsDownloading(false);
 		}
-	}, [downloadService, playlists, renamingPlaylistId, selectedIndex]);
+	}, [
+		downloadService,
+		isDownloading,
+		playlists,
+		renamingPlaylistId,
+		selectedIndex,
+	]);
 
 	useKeyBinding(KEYBINDINGS.UP, navigateUp);
 	useKeyBinding(KEYBINDINGS.DOWN, navigateDown);

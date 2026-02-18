@@ -9,7 +9,7 @@ import {usePlayer} from '../../hooks/usePlayer.ts';
 import {usePlaylist} from '../../hooks/usePlaylist.ts';
 import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {truncate} from '../../utils/format.ts';
-import {useCallback, useRef, useEffect} from 'react';
+import {useCallback, useRef, useEffect, useState} from 'react';
 import {logger} from '../../services/logger/logger.service.ts';
 import {useTerminalSize} from '../../hooks/useTerminalSize.ts';
 import {getMusicService} from '../../services/youtube-music/api.ts';
@@ -40,6 +40,7 @@ function SearchResults({
 	const musicService = getMusicService();
 	const downloadService = getDownloadService();
 	const {createPlaylist} = usePlaylist();
+	const [isDownloading, setIsDownloading] = useState(false);
 	const mixCreatedRef = useRef<Props['onMixCreated']>(onMixCreated);
 	mixCreatedRef.current = onMixCreated;
 	const downloadStatusRef = useRef<Props['onDownloadStatus']>(onDownloadStatus);
@@ -266,6 +267,10 @@ function SearchResults({
 
 	const downloadSelected = useCallback(async () => {
 		if (!isActive) return;
+		if (isDownloading) {
+			downloadStatusRef.current?.('Download already in progress. Please wait.');
+			return;
+		}
 		const selected = results[selectedIndex];
 		if (!selected) return;
 
@@ -278,6 +283,7 @@ function SearchResults({
 		}
 
 		try {
+			setIsDownloading(true);
 			const target = await downloadService.resolveSearchTarget(selected);
 			if (target.tracks.length === 0) {
 				downloadStatusRef.current?.(`No tracks found for "${target.name}".`);
@@ -285,7 +291,7 @@ function SearchResults({
 			}
 
 			downloadStatusRef.current?.(
-				`Downloading ${target.tracks.length} track(s) from "${target.name}"...`,
+				`Downloading ${target.tracks.length} track(s) from "${target.name}"... this can take a few minutes.`,
 			);
 			const summary = await downloadService.downloadTracks(target.tracks);
 			downloadStatusRef.current?.(
@@ -295,8 +301,10 @@ function SearchResults({
 			downloadStatusRef.current?.(
 				error instanceof Error ? error.message : 'Download failed.',
 			);
+		} finally {
+			setIsDownloading(false);
 		}
-	}, [downloadService, isActive, results, selectedIndex]);
+	}, [downloadService, isActive, isDownloading, results, selectedIndex]);
 
 	useKeyBinding(KEYBINDINGS.UP, navigateUp);
 	useKeyBinding(KEYBINDINGS.DOWN, navigateDown);

@@ -26,6 +26,7 @@ type DownloadTarget = {
 class DownloadService {
 	private ffmpegChecked = false;
 	private ffmpegAvailable = false;
+	private activeDownload = false;
 	private readonly config = getConfigService();
 	private readonly musicService = getMusicService();
 
@@ -89,6 +90,12 @@ class DownloadService {
 	}
 
 	async downloadTracks(tracks: Track[]): Promise<DownloadResult> {
+		if (this.activeDownload) {
+			throw new Error(
+				'A download is already in progress. Please wait for it to finish.',
+			);
+		}
+
 		const {directory, format} = this.getConfig();
 		if (!directory) {
 			throw new Error('No download directory configured.');
@@ -96,6 +103,7 @@ class DownloadService {
 
 		mkdirSync(directory, {recursive: true});
 		await this.ensureFfmpeg();
+		this.activeDownload = true;
 
 		const result: DownloadResult = {
 			downloaded: 0,
@@ -104,38 +112,86 @@ class DownloadService {
 			errors: [],
 		};
 
-		for (const track of tracks) {
-			const destination = this.getDestinationPath(track, directory, format);
-			const tempSource = `${destination}.source`;
-			try {
-				if (existsSync(destination)) {
-					result.skipped++;
-					continue;
-				}
+		try {
+			for (const track of tracks) {
+				const destination = this.getDestinationPath(track, directory, format);
+				const tempSource = `${destination}.source`;
+				try {
+					logger.info('DownloadService', 'Starting track download', {
+						videoId: track.videoId,
+						title: track.title,
+					});
+					if (existsSync(destination)) {
+						result.skipped++;
+						logger.debug('DownloadService', 'Skipping existing file', {
+							destination,
+						});
+						continue;
+					}
 
-				const streamUrl = await this.musicService.getStreamUrl(track.videoId);
-				const audioBuffer = await this.fetchAudio(streamUrl);
-				writeFileSync(tempSource, audioBuffer);
-				await this.convertAudio(tempSource, destination, format);
-				result.downloaded++;
-			} catch (error) {
-				result.failed++;
-				const message =
-					error instanceof Error ? error.message : 'Unknown download failure';
-				result.errors.push(message);
-				logger.error('DownloadService', 'Track download failed', {
-					videoId: track.videoId,
-					title: track.title,
-					error: message,
-				});
-			} finally {
-				if (existsSync(tempSource)) {
-					unlinkSync(tempSource);
+					try {
+						const streamUrl = await this.musicService.getStreamUrl(
+							track.videoId,
+						);
+						const audioBuffer = await this.fetchAudio(streamUrl);
+						writeFileSync(tempSource, audioBuffer);
+					} catch (streamError) {
+						logger.warn(
+							'DownloadService',
+							'Stream URL extraction failed, falling back to yt-dlp',
+							{
+								videoId: track.videoId,
+								error:
+									streamError instanceof Error
+										? streamError.message
+										: String(streamError),
+							},
+						);
+						try {
+							await this.recordViaYtDlp(track.videoId, tempSource);
+						} catch (ytdlpError) {
+							logger.warn(
+								'DownloadService',
+								'yt-dlp fallback failed, falling back to mpv recording',
+								{
+									videoId: track.videoId,
+									error:
+										ytdlpError instanceof Error
+											? ytdlpError.message
+											: String(ytdlpError),
+								},
+							);
+							await this.recordViaMpv(track.videoId, tempSource);
+						}
+					}
+
+					await this.convertAudio(tempSource, destination, format);
+					result.downloaded++;
+					logger.info('DownloadService', 'Track download complete', {
+						videoId: track.videoId,
+						destination,
+					});
+				} catch (error) {
+					result.failed++;
+					const message =
+						error instanceof Error ? error.message : 'Unknown download failure';
+					result.errors.push(message);
+					logger.error('DownloadService', 'Track download failed', {
+						videoId: track.videoId,
+						title: track.title,
+						error: message,
+					});
+				} finally {
+					if (existsSync(tempSource)) {
+						unlinkSync(tempSource);
+					}
 				}
 			}
-		}
 
-		return result;
+			return result;
+		} finally {
+			this.activeDownload = false;
+		}
 	}
 
 	private uniqueTracks(tracks: Track[]): Track[] {
@@ -244,6 +300,91 @@ class DownloadService {
 				}
 
 				reject(new Error(stderr.trim() || `ffmpeg exited with code ${code}`));
+			});
+		});
+	}
+
+	private async recordViaYtDlp(
+		videoId: string,
+		outputPath: string,
+	): Promise<void> {
+		const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+		await new Promise<void>((resolve, reject) => {
+			const process = spawn(
+				'yt-dlp',
+				[
+					'--no-playlist',
+					'--quiet',
+					'--no-warnings',
+					'--js-runtimes',
+					'node',
+					'-f',
+					'bestaudio',
+					'--output',
+					outputPath,
+					watchUrl,
+				],
+				{windowsHide: true},
+			);
+			let stderr = '';
+			let stdout = '';
+			process.stderr.on('data', chunk => {
+				stderr += String(chunk);
+			});
+			process.stdout.on('data', chunk => {
+				stdout += String(chunk);
+			});
+			process.on('error', reject);
+			process.on('exit', code => {
+				if (code === 0 && existsSync(outputPath)) {
+					resolve();
+					return;
+				}
+
+				reject(
+					new Error(
+						(stderr || stdout).trim() ||
+							`yt-dlp exited with code ${code} and no output file`,
+					),
+				);
+			});
+		});
+	}
+
+	private async recordViaMpv(
+		videoId: string,
+		outputPath: string,
+	): Promise<void> {
+		const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+		await new Promise<void>((resolve, reject) => {
+			const process = spawn(
+				'mpv',
+				[
+					watchUrl,
+					'--no-video',
+					'--ao=null',
+					'--ytdl=yes',
+					'--really-quiet',
+					`--stream-record=${outputPath}`,
+				],
+				{windowsHide: true},
+			);
+			let stderr = '';
+			process.stderr.on('data', chunk => {
+				stderr += String(chunk);
+			});
+			process.on('error', reject);
+			process.on('exit', code => {
+				if (code === 0 && existsSync(outputPath)) {
+					resolve();
+					return;
+				}
+
+				reject(
+					new Error(
+						stderr.trim() || `mpv exited with code ${code} and no output file`,
+					),
+				);
 			});
 		});
 	}

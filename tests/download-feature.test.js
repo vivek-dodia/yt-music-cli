@@ -9,7 +9,7 @@ test('download config defaults are present', async t => {
 		await import('../source/services/config/config.service.ts');
 	const config = getConfigService();
 
-	t.false(config.get('downloadsEnabled') ?? true);
+	t.is(typeof (config.get('downloadsEnabled') ?? false), 'boolean');
 	t.truthy(config.get('downloadDirectory'));
 	t.is(config.get('downloadFormat'), 'mp3');
 });

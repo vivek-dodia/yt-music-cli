@@ -13,7 +13,6 @@ import type {
 	PlaylistSearchResult,
 	ChannelSearchResult,
 	SearchResponse as YoutubeiSearchResponse,
-	VideoInfo,
 } from '../../types/youtubei.types.ts';
 import {Innertube} from 'youtubei.js';
 import {logger} from '../logger/logger.service.ts';
@@ -405,161 +404,68 @@ class MusicService {
 
 	async getStreamUrl(videoId: string): Promise<string> {
 		logger.info('MusicService', 'Starting stream extraction', {videoId});
+		const isBunRuntime =
+			typeof (globalThis as {Bun?: unknown}).Bun !== 'undefined';
 
-		// Try Method 1: @distube/ytdl-core (most reliable, actively maintained)
-		try {
-			logger.debug('MusicService', 'Attempting ytdl-core extraction', {
-				videoId,
-			});
-			const ytdl = await import('@distube/ytdl-core');
-			const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-
-			const info = await ytdl.default.getInfo(videoUrl);
-			logger.debug('MusicService', 'ytdl-core getInfo succeeded', {
-				formatCount: info.formats.length,
-			});
-
-			const audioFormats = ytdl.default.filterFormats(
-				info.formats,
-				'audioonly',
-			);
-			logger.debug('MusicService', 'ytdl-core audio formats filtered', {
-				audioFormatCount: audioFormats.length,
-			});
-
-			if (audioFormats.length > 0) {
-				// Get highest quality audio
-				const bestAudio = audioFormats.sort((a, b) => {
-					const aBitrate = Number.parseInt(String(a.audioBitrate || 0));
-					const bBitrate = Number.parseInt(String(b.audioBitrate || 0));
-					return bBitrate - aBitrate;
-				})[0];
-
-				if (bestAudio?.url) {
-					logger.info('MusicService', 'Using ytdl-core stream', {
-						bitrate: bestAudio.audioBitrate,
-						urlLength: bestAudio.url.length,
-						mimeType: bestAudio.mimeType,
-					});
-					return bestAudio.url;
-				}
-			}
-
-			logger.warn('MusicService', 'ytdl-core: No audio formats with URL found');
-		} catch (error) {
-			logger.error('MusicService', 'ytdl-core extraction failed', {
-				error: error instanceof Error ? error.message : String(error),
-				stack: error instanceof Error ? error.stack : undefined,
-			});
-		}
-
-		// Try Method 2: youtubei.js (may fail with ParsingError)
-		try {
-			logger.debug('MusicService', 'Attempting youtubei.js extraction', {
-				videoId,
-			});
-			const yt = await getClient();
-			const video = (await yt.getInfo(videoId)) as unknown as VideoInfo;
-			logger.debug('MusicService', 'youtubei.js getInfo succeeded');
-
-			// Get the download URL for the video
-			const streamData = video.chooseFormat?.({
-				type: 'audio',
-				quality: 'best',
-			});
-
-			if (streamData?.url) {
-				logger.info('MusicService', 'Using youtubei.js stream (chooseFormat)', {
-					urlLength: streamData.url.length,
-				});
-				return streamData.url;
-			}
-
-			// Fallback: Manually select from streaming_data.adaptive_formats
-			logger.debug(
+		// Try Method 1: @distube/ytdl-core (skip under Bun due undici incompatibility)
+		if (isBunRuntime) {
+			logger.warn(
 				'MusicService',
-				'chooseFormat returned nothing, trying manual selection',
+				'Skipping ytdl-core extraction on Bun runtime',
+				{videoId},
 			);
+		} else {
+			try {
+				logger.debug('MusicService', 'Attempting ytdl-core extraction', {
+					videoId,
+				});
+				const ytdl = await import('@distube/ytdl-core');
+				const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-			type StreamFormat = {
-				mime_type?: string;
-				type?: string;
-				bitrate?: number | string;
-				url?: string;
-				signature_cipher?: string;
-				signatureCipher?: string;
-			};
-
-			const streamingData = (
-				video as {streaming_data?: {adaptive_formats?: StreamFormat[]}}
-			).streaming_data;
-			if (streamingData?.adaptive_formats) {
-				logger.debug('MusicService', 'Found adaptive_formats', {
-					count: streamingData.adaptive_formats.length,
+				const info = await ytdl.default.getInfo(videoUrl);
+				logger.debug('MusicService', 'ytdl-core getInfo succeeded', {
+					formatCount: info.formats.length,
 				});
 
-				// Filter for audio-only formats
-				const audioFormats = streamingData.adaptive_formats.filter(
-					(f: StreamFormat) =>
-						f.mime_type?.includes('audio') || f.type?.includes('audio'),
+				const audioFormats = ytdl.default.filterFormats(
+					info.formats,
+					'audioonly',
 				);
-
-				logger.debug('MusicService', 'Audio formats found', {
-					count: audioFormats.length,
+				logger.debug('MusicService', 'ytdl-core audio formats filtered', {
+					audioFormatCount: audioFormats.length,
 				});
 
 				if (audioFormats.length > 0) {
-					// Sort by bitrate (higher is better)
-					const sorted = audioFormats.sort(
-						(a: StreamFormat, b: StreamFormat) => {
-							const aBitrate = Number.parseInt(String(a.bitrate || 0));
-							const bBitrate = Number.parseInt(String(b.bitrate || 0));
-							return bBitrate - aBitrate;
-						},
-					);
+					// Get highest quality audio
+					const bestAudio = audioFormats.sort((a, b) => {
+						const aBitrate = Number.parseInt(String(a.audioBitrate || 0));
+						const bBitrate = Number.parseInt(String(b.audioBitrate || 0));
+						return bBitrate - aBitrate;
+					})[0];
 
-					const bestAudio = sorted[0];
-
-					if (bestAudio) {
-						// Check for direct URL
-						if (bestAudio.url) {
-							logger.info('MusicService', 'Using youtubei.js stream (manual)', {
-								bitrate: bestAudio.bitrate,
-								mimeType: bestAudio.mime_type || bestAudio.type,
-								urlLength: bestAudio.url.length,
-							});
-							return bestAudio.url;
-						}
-
-						// Check for signatureCipher (needs decoding)
-						if (bestAudio.signature_cipher || bestAudio.signatureCipher) {
-							logger.warn(
-								'MusicService',
-								'Format has signature cipher (not supported)',
-								{
-									hasCipher: true,
-								},
-							);
-						}
+					if (bestAudio?.url) {
+						logger.info('MusicService', 'Using ytdl-core stream', {
+							bitrate: bestAudio.audioBitrate,
+							urlLength: bestAudio.url.length,
+							mimeType: bestAudio.mimeType,
+						});
+						return bestAudio.url;
 					}
 				}
-			}
 
-			logger.warn('MusicService', 'youtubei.js: No usable stream URL found');
-		} catch (error) {
-			if (error instanceof Error && error.message.includes('ParsingError')) {
-				logger.warn('MusicService', 'youtubei.js parsing error (expected)', {
-					error: error.message,
-				});
-			} else {
-				logger.error('MusicService', 'youtubei.js extraction failed', {
+				logger.warn(
+					'MusicService',
+					'ytdl-core: No audio formats with URL found',
+				);
+			} catch (error) {
+				logger.error('MusicService', 'ytdl-core extraction failed', {
 					error: error instanceof Error ? error.message : String(error),
 					stack: error instanceof Error ? error.stack : undefined,
 				});
 			}
 		}
 
-		// Try Method 3: youtube-ext (lightweight, no parsing needed)
+		// Try Method 2: youtube-ext (lightweight, no parser path)
 		try {
 			logger.debug('MusicService', 'Attempting youtube-ext extraction', {
 				videoId,
@@ -608,7 +514,7 @@ class MusicService {
 			});
 		}
 
-		// Try Method 4: Invidious API (last resort)
+		// Try Method 3: Invidious API (last resort)
 		try {
 			logger.debug('MusicService', 'Attempting Invidious extraction', {
 				videoId,
