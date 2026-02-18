@@ -1,7 +1,19 @@
 // Player store - manages player state
-import {createContext, useContext, useReducer, type ReactNode} from 'react';
+import {
+	createContext,
+	useContext,
+	useReducer,
+	useEffect,
+	useRef,
+	type ReactNode,
+} from 'react';
 import type {PlayerState, PlayerAction} from '../types/player.types.ts';
 import {getPlayerService} from '../services/player/player.service.ts';
+import {
+	loadPlayerState,
+	savePlayerState,
+} from '../services/player-state/player-state.service.ts';
+import {logger} from '../services/logger/logger.service.ts';
 
 const initialState: PlayerState = {
 	currentTrack: null,
@@ -204,8 +216,7 @@ type PlayerContextValue = {
 
 import {getConfigService} from '../services/config/config.service.ts';
 import {getMusicService} from '../services/youtube-music/api.ts';
-import {useEffect, useRef, useMemo} from 'react';
-import {logger} from '../services/logger/logger.service.ts';
+import {useMemo} from 'react';
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
@@ -323,6 +334,119 @@ function PlayerManager() {
 
 export function PlayerProvider({children}: {children: ReactNode}) {
 	const [state, dispatch] = useReducer(playerReducer, initialState);
+	const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const isInitializedRef = useRef(false);
+
+	// Load persisted state on mount
+	useEffect(() => {
+		void loadPlayerState().then(persistedState => {
+			if (persistedState && !isInitializedRef.current) {
+				logger.info('PlayerProvider', 'Restoring persisted state', {
+					hasTrack: !!persistedState.currentTrack,
+					queueLength: persistedState.queue.length,
+					progress: persistedState.progress,
+				});
+
+				// Restore state
+				if (persistedState.currentTrack) {
+					dispatch({category: 'PLAY', track: persistedState.currentTrack});
+					// Restore progress after track is loaded
+					dispatch({category: 'SEEK', position: persistedState.progress});
+				}
+
+				if (persistedState.queue.length > 0) {
+					dispatch({category: 'SET_QUEUE', queue: persistedState.queue});
+					dispatch({
+						category: 'SET_QUEUE_POSITION',
+						position: persistedState.queuePosition,
+					});
+				}
+
+				dispatch({category: 'SET_VOLUME', volume: persistedState.volume});
+
+				if (persistedState.shuffle) {
+					dispatch({category: 'TOGGLE_SHUFFLE'});
+				}
+
+				if (persistedState.repeat !== 'off') {
+					// Toggle once for 'all', twice for 'one'
+					dispatch({category: 'TOGGLE_REPEAT'});
+					if (persistedState.repeat === 'one') {
+						dispatch({category: 'TOGGLE_REPEAT'});
+					}
+				}
+
+				isInitializedRef.current = true;
+			}
+		});
+	}, []);
+
+	// Save state on changes (debounced for progress updates)
+	useEffect(() => {
+		// Don't save during initial load
+		if (!isInitializedRef.current) return;
+
+		// Debounce saves (every 5 seconds for progress, immediate for other changes)
+		if (saveTimeoutRef.current) {
+			clearTimeout(saveTimeoutRef.current);
+		}
+
+		saveTimeoutRef.current = setTimeout(
+			() => {
+				void savePlayerState({
+					currentTrack: state.currentTrack,
+					queue: state.queue,
+					queuePosition: state.queuePosition,
+					progress: state.progress,
+					volume: state.volume,
+					shuffle: state.shuffle,
+					repeat: state.repeat,
+				});
+			},
+			// Debounce progress updates (5s), immediate for track/queue changes
+			state.progress > 0 ? 5000 : 0,
+		);
+
+		return () => {
+			if (saveTimeoutRef.current) {
+				clearTimeout(saveTimeoutRef.current);
+			}
+		};
+	}, [
+		state.currentTrack,
+		state.queue,
+		state.queuePosition,
+		state.progress,
+		state.volume,
+		state.shuffle,
+		state.repeat,
+	]);
+
+	// Save immediately on unmount/quit
+	useEffect(() => {
+		const handleExit = () => {
+			void savePlayerState({
+				currentTrack: state.currentTrack,
+				queue: state.queue,
+				queuePosition: state.queuePosition,
+				progress: state.progress,
+				volume: state.volume,
+				shuffle: state.shuffle,
+				repeat: state.repeat,
+			});
+		};
+
+		process.on('beforeExit', handleExit);
+		process.on('SIGINT', handleExit);
+		process.on('SIGTERM', handleExit);
+
+		return () => {
+			handleExit(); // Save on component unmount
+			process.off('beforeExit', handleExit);
+			process.off('SIGINT', handleExit);
+			process.off('SIGTERM', handleExit);
+		};
+	}, [state]);
 
 	const actions = useMemo(
 		() => ({
