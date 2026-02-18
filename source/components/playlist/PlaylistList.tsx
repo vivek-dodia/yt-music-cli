@@ -14,7 +14,8 @@ export default function PlaylistList() {
 	const {theme} = useTheme();
 	const {play, setQueue} = usePlayer();
 	const {dispatch} = useNavigation();
-	const {playlists, createPlaylist, renamePlaylist} = usePlaylist();
+	const {playlists, createPlaylist, renamePlaylist, deletePlaylist} =
+		usePlaylist();
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [lastCreated, setLastCreated] = useState<string | null>(null);
 	const [renamingPlaylistId, setRenamingPlaylistId] = useState<string | null>(
@@ -77,11 +78,20 @@ export default function PlaylistList() {
 		dispatch({category: 'GO_BACK'});
 	}, [dispatch, renamingPlaylistId]);
 
+	const handleDelete = useCallback(() => {
+		if (renamingPlaylistId) return;
+		const playlist = playlists[selectedIndex];
+		if (!playlist) return;
+		deletePlaylist(playlist.playlistId);
+		setSelectedIndex(prev => Math.max(0, prev - 1));
+	}, [deletePlaylist, playlists, renamingPlaylistId, selectedIndex]);
+
 	useKeyBinding(KEYBINDINGS.UP, navigateUp);
 	useKeyBinding(KEYBINDINGS.DOWN, navigateDown);
 	useKeyBinding(KEYBINDINGS.SELECT, startPlaylist);
 	useKeyBinding(['r'], handleRename);
 	useKeyBinding(KEYBINDINGS.CREATE_PLAYLIST, handleCreate);
+	useKeyBinding(KEYBINDINGS.DELETE_PLAYLIST, handleDelete);
 	useKeyBinding(KEYBINDINGS.BACK, handleBack);
 
 	return (
@@ -154,10 +164,11 @@ export default function PlaylistList() {
 			{/* Instructions */}
 			<Box marginTop={1}>
 				<Text color={theme.colors.dim}>
-					<Text color={theme.colors.text}>Enter</Text> to play playlist |{' '}
-					<Text color={theme.colors.text}>r</Text> to rename |{' '}
-					<Text color={theme.colors.text}>c</Text> to create |{' '}
-					<Text color={theme.colors.text}>Esc</Text> to go back
+					<Text color={theme.colors.text}>Enter</Text> to play |{' '}
+					<Text color={theme.colors.text}>r</Text> rename |{' '}
+					<Text color={theme.colors.text}>c</Text> create |{' '}
+					<Text color={theme.colors.text}>D</Text> delete |{' '}
+					<Text color={theme.colors.text}>Esc</Text> back
 				</Text>
 				{lastCreated && (
 					<Text color={theme.colors.accent}> Created {lastCreated}</Text>

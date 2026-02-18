@@ -7,7 +7,7 @@ import {useNavigation} from '../../hooks/useNavigation.ts';
 import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import {usePlayer} from '../../hooks/usePlayer.ts';
 import {usePlaylist} from '../../hooks/usePlaylist.ts';
-import {KEYBINDINGS} from '../../utils/constants.ts';
+import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {truncate} from '../../utils/format.ts';
 import {useCallback, useRef, useEffect} from 'react';
 import {logger} from '../../services/logger/logger.service.ts';
@@ -242,11 +242,15 @@ function SearchResults({
 			playerDispatch({category: 'PLAY', track: firstTrack});
 		}
 
+		// Navigate to player view so the user lands on the queue/player
+		dispatch({category: 'NAVIGATE', view: VIEW.PLAYER});
+
 		mixCreatedRef.current?.(
 			`Created mix "${playlist.name}" with ${uniqueTracks.length} tracks — playing now.`,
 		);
 	}, [
 		createPlaylist,
+		dispatch,
 		isActive,
 		musicService,
 		playerDispatch,

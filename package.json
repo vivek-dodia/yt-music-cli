@@ -21,6 +21,20 @@
 		"LICENSE",
 		".github/FUNDING.yml"
 	],
+	"icon": "assets/icon2.PNG",
+	"sponsor": {
+		"url": "https://github.com/sponsors/involvex"
+	},
+	"homepage": "https://involvex.github.io/youtube-music-cli/",
+	"keywords": [
+		"cli",
+		"youtube",
+		"youtube-music",
+		"youtube-cli",
+		"youtube-music-cli",
+		"ink",
+		"cli-music"
+	],
 	"scripts": {
 		"prebuild": "bun run format && bun run lint:fix && bun run typecheck",
 		"build": "tsc",

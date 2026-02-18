@@ -89,7 +89,7 @@ function MainLayout() {
 	useKeyBinding(KEYBINDINGS.SUGGESTIONS, goToSuggestions);
 	useKeyBinding(KEYBINDINGS.SETTINGS, goToSettings);
 	useKeyBinding(KEYBINDINGS.HELP, goToHelp);
-	useKeyBinding(['m'], togglePlayerMode);
+	useKeyBinding(['M'], togglePlayerMode);
 	useKeyBinding(['l'], goToLyrics);
 	useKeyBinding(['T'], goToTrending);
 	useKeyBinding(['e'], goToExplore);

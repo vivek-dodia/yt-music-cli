@@ -1,15 +1,12 @@
 // Shortcuts bar component
 import {Box, Text} from 'ink';
-import {useCallback} from 'react';
 import {usePlayer} from '../../hooks/usePlayer.ts';
-import {useNavigation} from '../../hooks/useNavigation.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import {KEYBINDINGS} from '../../utils/constants.ts';
 
 export default function ShortcutsBar() {
 	const {theme} = useTheme();
-	const {dispatch: navDispatch} = useNavigation();
 	const {
 		state: playerState,
 		pause,
@@ -31,10 +28,6 @@ export default function ShortcutsBar() {
 		}
 	};
 
-	const goConfig = useCallback(() => {
-		navDispatch({category: 'NAVIGATE', view: 'config'});
-	}, [navDispatch]);
-
 	useKeyBinding(KEYBINDINGS.PLAY_PAUSE, handlePlayPause);
 	useKeyBinding(KEYBINDINGS.NEXT, next);
 	useKeyBinding(KEYBINDINGS.PREVIOUS, previous);
@@ -42,7 +35,7 @@ export default function ShortcutsBar() {
 	useKeyBinding(KEYBINDINGS.VOLUME_DOWN, volumeDown);
 	useKeyBinding(KEYBINDINGS.VOLUME_FINE_UP, volumeFineUp);
 	useKeyBinding(KEYBINDINGS.VOLUME_FINE_DOWN, volumeFineDown);
-	useKeyBinding(KEYBINDINGS.SETTINGS, goConfig);
+	// Note: SETTINGS keybinding handled by MainLayout to avoid double-dispatch
 
 	return (
 		<Box
@@ -55,11 +48,11 @@ export default function ShortcutsBar() {
 			<Text color={theme.colors.dim}>
 				Shortcuts: <Text color={theme.colors.text}>Space</Text> Play/Pause |{' '}
 				<Text color={theme.colors.text}>→</Text> Next |{' '}
-				<Text color={theme.colors.text}>←</Text> Previous |{' '}
+				<Text color={theme.colors.text}>←</Text> Prev |{' '}
 				<Text color={theme.colors.text}>Shift+P</Text> Playlists |{' '}
-				<Text color={theme.colors.text}>p</Text> Plugins |{' '}
+				<Text color={theme.colors.text}>m</Text> Mix |{' '}
+				<Text color={theme.colors.text}>M</Text> Mini |{' '}
 				<Text color={theme.colors.text}>/</Text> Search |{' '}
-				<Text color={theme.colors.text}>,</Text> Settings |{' '}
 				<Text color={theme.colors.text}>?</Text> Help |{' '}
 				<Text color={theme.colors.text}>q</Text> Quit
 			</Text>
