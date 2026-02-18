@@ -1,3 +1,13 @@
+## [0.0.16](https://github.com/involvex/youtube-music-cli/compare/v0.0.15...v0.0.16) (2026-02-18)
+
+### Bug Fixes
+
+- correct shuffle hotkey and mpv error handling ([7a08643](https://github.com/involvex/youtube-music-cli/commit/7a0864395b48c8bc1b30d817edc5b2f7cb9c79c6))
+
+### Features
+
+- implement shuffle mode with Shift+S hotkey ([77be9ae](https://github.com/involvex/youtube-music-cli/commit/77be9ae53650dc3bf40a89427fbb1b6eef32683a))
+
 ## [0.0.15](https://github.com/involvex/youtube-music-cli/compare/v0.0.14...v0.0.15) (2026-02-18)
 
 ### Features
