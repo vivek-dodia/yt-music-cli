@@ -5,6 +5,7 @@ import React from 'react';
 import {SEARCH_TYPE} from '../../utils/constants.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import {useKeyBinding} from '../../hooks/useKeyboard.ts';
+import {useKeyboardBlocker} from '../../hooks/useKeyboardBlocker.tsx';
 import {Box, Text} from 'ink';
 import TextInput from 'ink-text-input';
 import {getConfigService} from '../../services/config/config.service.ts';
@@ -58,6 +59,7 @@ function SearchBar({onInput, isActive = true}: Props) {
 
 	useKeyBinding(['tab'], cycleType);
 	useKeyBinding(['escape'], clearSearch);
+	useKeyboardBlocker(isActive);
 
 	return (
 		<Box
