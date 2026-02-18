@@ -235,10 +235,24 @@ function SearchResults({
 			trackCount: uniqueTracks.length,
 		});
 
+		// Queue the mix tracks and start playing the first one
+		playerDispatch({category: 'SET_QUEUE', queue: uniqueTracks});
+		const firstTrack = uniqueTracks[0];
+		if (firstTrack) {
+			playerDispatch({category: 'PLAY', track: firstTrack});
+		}
+
 		mixCreatedRef.current?.(
-			`Created mix "${playlist.name}" with ${uniqueTracks.length} tracks.`,
+			`Created mix "${playlist.name}" with ${uniqueTracks.length} tracks — playing now.`,
 		);
-	}, [createPlaylist, isActive, musicService, results, selectedIndex]);
+	}, [
+		createPlaylist,
+		isActive,
+		musicService,
+		playerDispatch,
+		results,
+		selectedIndex,
+	]);
 
 	useKeyBinding(KEYBINDINGS.UP, navigateUp);
 	useKeyBinding(KEYBINDINGS.DOWN, navigateDown);

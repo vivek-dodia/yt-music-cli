@@ -14,7 +14,6 @@ import type {
 	ChannelSearchResult,
 	SearchResponse as YoutubeiSearchResponse,
 	VideoInfo,
-	RelatedContent,
 } from '../../types/youtubei.types.ts';
 import {Innertube} from 'youtubei.js';
 import {logger} from '../logger/logger.service.ts';
@@ -298,44 +297,49 @@ class MusicService {
 		try {
 			const yt = await getClient();
 
-			let video: VideoInfo | null = null;
-			try {
-				video = (await yt.getInfo(trackId)) as unknown as VideoInfo;
-			} catch (error) {
-				logger.warn('MusicService', 'getSuggestions getInfo failed', {
-					error: error instanceof Error ? error.message : String(error),
-				});
-				return [];
-			}
+			// Use music.getUpNext with automix — avoids the yt.getInfo() ParsingError
+			// caused by YouTube "Remove ads" menu items that youtubei.js can't parse.
+			const panel = await yt.music.getUpNext(trackId, true);
 
-			const suggestions = video?.related?.contents ?? [];
 			const tracks: Track[] = [];
 
-			for (const item of suggestions) {
-				const videoId = (item as RelatedContent)?.id || '';
-				if (!videoId) continue;
+			for (const item of panel.contents) {
+				const video = item as unknown as {
+					video_id?: string;
+					title?: string | {text?: string};
+					artists?: Array<{name?: string; channel_id?: string}>;
+					duration?: {seconds?: number};
+				};
+
+				const videoId = video.video_id;
+				if (!videoId || videoId === trackId) continue;
 
 				const title =
-					typeof item.title === 'string' ? item.title : item.title?.text;
+					typeof video.title === 'string'
+						? video.title
+						: (video.title?.text ?? '');
 				if (!title) continue;
 
 				tracks.push({
 					videoId,
 					title,
-					artists: [],
+					artists: (video.artists ?? []).map(a => ({
+						artistId: a.channel_id ?? '',
+						name: a.name ?? 'Unknown',
+					})),
+					duration: video.duration?.seconds ?? 0,
 				});
 			}
 
-			return tracks.slice(0, 10);
+			logger.debug('MusicService', 'getSuggestions success', {
+				trackId,
+				count: tracks.length,
+			});
+
+			return tracks.slice(0, 15);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
-			if (message.includes('ParsingError')) {
-				logger.warn('MusicService', 'getSuggestions parsing error', {
-					error: message,
-				});
-			} else {
-				logger.error('MusicService', 'getSuggestions failed', {error: message});
-			}
+			logger.warn('MusicService', 'getSuggestions failed', {error: message});
 			return [];
 		}
 	}
