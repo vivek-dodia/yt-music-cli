@@ -18,6 +18,7 @@ import type {
 } from '../../types/youtubei.types.ts';
 import {Innertube} from 'youtubei.js';
 import {logger} from '../logger/logger.service.ts';
+import {getSearchCache} from '../cache/cache.service.ts';
 
 // Initialize YouTube client
 let ytClient: Innertube | null = null;
@@ -30,12 +31,26 @@ async function getClient() {
 }
 
 class MusicService {
+	private readonly searchCache = getSearchCache();
+
 	async search(
 		query: string,
 		options: SearchOptions = {},
 	): Promise<SearchResponse> {
-		const results: SearchResult[] = [];
 		const searchType = options.type || 'all';
+		const cacheKey = `search:${searchType}:${options.limit ?? 20}:${query}`;
+
+		// Return cached result if available
+		const cached = this.searchCache.get(cacheKey) as SearchResponse | null;
+		if (cached) {
+			logger.debug('MusicService', 'Returning cached search results', {
+				query,
+				resultCount: cached.results.length,
+			});
+			return cached;
+		}
+
+		const results: SearchResult[] = [];
 
 		try {
 			const yt = await getClient();
@@ -119,10 +134,15 @@ class MusicService {
 			console.error('Search failed:', error);
 		}
 
-		return {
+		const response: SearchResponse = {
 			results,
 			hasMore: false,
 		};
+
+		// Cache the result
+		this.searchCache.set(cacheKey, response as unknown);
+
+		return response;
 	}
 
 	async getTrack(videoId: string): Promise<Track | null> {
@@ -155,6 +175,123 @@ class MusicService {
 			name: 'Unknown Playlist',
 			tracks: [],
 		};
+	}
+
+	async getTrending(): Promise<Track[]> {
+		try {
+			const yt = await getClient();
+			const trending = (await yt.getTrending()) as unknown as {
+				sections?: Array<{
+					items?: Array<{
+						id?: string;
+						video_id?: string;
+						title?: string | {text?: string};
+						author?: string | {name?: string};
+						duration?: number | {seconds?: number};
+					}>;
+				}>;
+			};
+
+			const tracks: Track[] = [];
+			const sections = trending.sections ?? [];
+			for (const section of sections) {
+				for (const item of section.items ?? []) {
+					const videoId = item.id || item.video_id;
+					if (!videoId) continue;
+					tracks.push({
+						videoId,
+						title:
+							(typeof item.title === 'string'
+								? item.title
+								: item.title?.text) ?? 'Unknown',
+						artists: [
+							{
+								artistId: '',
+								name:
+									(typeof item.author === 'string'
+										? item.author
+										: item.author?.name) ?? 'Unknown',
+							},
+						],
+						duration:
+							(typeof item.duration === 'number'
+								? item.duration
+								: item.duration?.seconds) ?? 0,
+					});
+				}
+			}
+
+			return tracks.slice(0, 25);
+		} catch (error) {
+			logger.error('MusicService', 'getTrending failed', {
+				error: error instanceof Error ? error.message : String(error),
+			});
+			return [];
+		}
+	}
+
+	async getExploreSections(): Promise<Array<{title: string; tracks: Track[]}>> {
+		try {
+			const yt = await getClient();
+			const music = yt.music;
+			const explore = (await music.getExplore()) as unknown as {
+				sections?: Array<{
+					header?: {title?: string | {text?: string}};
+					contents?: Array<{
+						id?: string;
+						video_id?: string;
+						title?: string | {text?: string};
+						author?: string | {name?: string};
+						duration?: number | {seconds?: number};
+					}>;
+				}>;
+			};
+
+			const result: Array<{title: string; tracks: Track[]}> = [];
+			for (const section of explore.sections ?? []) {
+				const title =
+					(typeof section.header?.title === 'string'
+						? section.header.title
+						: section.header?.title?.text) ?? 'Featured';
+				const tracks: Track[] = [];
+
+				for (const item of section.contents ?? []) {
+					const videoId = item.id || item.video_id;
+					if (!videoId) continue;
+					tracks.push({
+						videoId,
+						title:
+							(typeof item.title === 'string'
+								? item.title
+								: item.title?.text) ?? 'Unknown',
+						artists: [
+							{
+								artistId: '',
+								name:
+									(typeof item.author === 'string'
+										? item.author
+										: item.author?.name) ?? 'Unknown',
+							},
+						],
+						duration:
+							(typeof item.duration === 'number'
+								? item.duration
+								: item.duration?.seconds) ?? 0,
+					});
+				}
+
+				if (tracks.length > 0) {
+					result.push({title, tracks: tracks.slice(0, 10)});
+				}
+			}
+
+			return result;
+		} catch (error) {
+			logger.error('MusicService', 'getExploreSections failed', {
+				error: error instanceof Error ? error.message : String(error),
+			});
+			return [];
+		}
 	}
 
 	async getSuggestions(trackId: string): Promise<Track[]> {

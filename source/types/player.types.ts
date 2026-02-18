@@ -10,6 +10,8 @@ import type {
 	SetVolumeAction,
 	VolumeUpAction,
 	VolumeDownAction,
+	VolumeFineUpAction,
+	VolumeFineDownAction,
 	ToggleShuffleAction,
 	ToggleRepeatAction,
 	SetQueueAction,
@@ -23,6 +25,7 @@ import type {
 	SetLoadingAction,
 	SetErrorAction,
 	RestoreStateAction,
+	SetSpeedAction,
 } from './actions.ts';
 
 import type {Track} from './youtube-music.types.ts';
@@ -31,6 +34,7 @@ export interface PlayerState {
 	currentTrack: Track | null;
 	isPlaying: boolean;
 	volume: number;
+	speed: number;
 	progress: number;
 	duration: number;
 	queue: Track[];
@@ -52,6 +56,8 @@ export type PlayerAction =
 	| SetVolumeAction
 	| VolumeUpAction
 	| VolumeDownAction
+	| VolumeFineUpAction
+	| VolumeFineDownAction
 	| ToggleShuffleAction
 	| ToggleRepeatAction
 	| SetQueueAction
@@ -64,4 +70,5 @@ export type PlayerAction =
 	| TickAction
 	| SetLoadingAction
 	| SetErrorAction
-	| RestoreStateAction;
+	| RestoreStateAction
+	| SetSpeedAction;

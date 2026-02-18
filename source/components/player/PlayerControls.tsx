@@ -28,6 +28,8 @@ export default function PlayerControls() {
 		previous,
 		volumeUp,
 		volumeDown,
+		speedUp,
+		speedDown,
 	} = usePlayer();
 
 	// DEBUG: Log when callbacks change (detect instability)
@@ -52,6 +54,8 @@ export default function PlayerControls() {
 	useKeyBinding(KEYBINDINGS.PREVIOUS, previous);
 	useKeyBinding(KEYBINDINGS.VOLUME_UP, volumeUp);
 	useKeyBinding(KEYBINDINGS.VOLUME_DOWN, volumeDown);
+	useKeyBinding(KEYBINDINGS.SPEED_UP, speedUp);
+	useKeyBinding(KEYBINDINGS.SPEED_DOWN, speedDown);
 
 	return (
 		<Box
@@ -88,6 +92,14 @@ export default function PlayerControls() {
 			<Text color={theme.colors.text}>
 				[<Text color={theme.colors.dim}>+/-</Text>] Vol: {playerState.volume}%
 			</Text>
+
+			{/* Speed indicator (only shown when not 1.0x) */}
+			{(playerState.speed ?? 1.0) !== 1.0 && (
+				<Text color={theme.colors.accent}>
+					[<Text color={theme.colors.dim}>&lt;&gt;</Text>]{' '}
+					{(playerState.speed ?? 1.0).toFixed(2)}x
+				</Text>
+			)}
 		</Box>
 	);
 }

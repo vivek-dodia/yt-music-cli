@@ -4,11 +4,32 @@ import {usePlayer} from '../../hooks/usePlayer.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import {formatTime} from '../../utils/format.ts';
 import {useTerminalSize} from '../../hooks/useTerminalSize.ts';
+import {getSleepTimerService} from '../../services/sleep-timer/sleep-timer.service.ts';
+import {useState, useEffect} from 'react';
 
 export default function NowPlaying() {
 	const {theme} = useTheme();
 	const {state: playerState} = usePlayer();
 	const {columns} = useTerminalSize();
+	const sleepTimer = getSleepTimerService();
+	const [sleepRemaining, setSleepRemaining] = useState<number | null>(null);
+
+	// Poll sleep timer remaining every second
+	useEffect(() => {
+		if (!sleepTimer.isActive()) {
+			return;
+		}
+		const interval = setInterval(() => {
+			const remaining = sleepTimer.getRemainingSeconds();
+			setSleepRemaining(remaining);
+			if (remaining === null || remaining === 0) {
+				clearInterval(interval);
+			}
+		}, 1000);
+		return () => {
+			clearInterval(interval);
+		};
+	}, [sleepTimer]);
 
 	if (!playerState.currentTrack) {
 		return (
@@ -73,6 +94,12 @@ export default function NowPlaying() {
 				)}
 				{!playerState.isPlaying && progress > 0 && (
 					<Text color={theme.colors.dim}> ⏸</Text>
+				)}
+				{sleepRemaining !== null && (
+					<Text color={theme.colors.warning}>
+						{' '}
+						⏾ {formatTime(sleepRemaining)}
+					</Text>
 				)}
 			</Box>
 

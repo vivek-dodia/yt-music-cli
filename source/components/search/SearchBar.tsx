@@ -7,6 +7,7 @@ import {useTheme} from '../../hooks/useTheme.ts';
 import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import {Box, Text} from 'ink';
 import TextInput from 'ink-text-input';
+import {getConfigService} from '../../services/config/config.service.ts';
 
 type Props = {
 	onInput: (input: string) => void;
@@ -17,6 +18,7 @@ function SearchBar({onInput, isActive = true}: Props) {
 	const {theme} = useTheme();
 	const {state: navState, dispatch} = useNavigation();
 	const [input, setInput] = useState('');
+	const config = getConfigService();
 
 	const searchTypes = Object.values(SEARCH_TYPE);
 
@@ -38,11 +40,12 @@ function SearchBar({onInput, isActive = true}: Props) {
 	const handleSubmit = useCallback(
 		(value: string) => {
 			if (value && isActive) {
+				config.addToSearchHistory(value);
 				dispatch({category: 'SET_SEARCH_QUERY', query: value});
 				onInput(value);
 			}
 		},
-		[dispatch, onInput, isActive],
+		[dispatch, onInput, isActive, config],
 	);
 
 	// Handle clearing search

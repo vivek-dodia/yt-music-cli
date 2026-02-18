@@ -22,6 +22,7 @@ const initialState: NavigationState = {
 	hasSearched: false,
 	searchLimit: 10,
 	history: [],
+	playerMode: 'full',
 };
 
 function navigationReducer(
@@ -70,6 +71,12 @@ function navigationReducer(
 			return {
 				...state,
 				searchLimit: Math.max(1, Math.min(50, action.limit)),
+			};
+
+		case 'TOGGLE_PLAYER_MODE':
+			return {
+				...state,
+				playerMode: state.playerMode === 'full' ? 'mini' : 'full',
 			};
 
 		default:

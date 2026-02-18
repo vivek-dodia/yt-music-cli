@@ -14,11 +14,16 @@ import {
 	savePlayerState,
 } from '../services/player-state/player-state.service.ts';
 import {logger} from '../services/logger/logger.service.ts';
+import {getNotificationService} from '../services/notification/notification.service.ts';
+import {getScrobblingService} from '../services/scrobbling/scrobbling.service.ts';
+import {getDiscordRpcService} from '../services/discord/discord-rpc.service.ts';
+import {getMprisService} from '../services/mpris/mpris.service.ts';
 
 const initialState: PlayerState = {
 	currentTrack: null,
 	isPlaying: false,
 	volume: 70,
+	speed: 1.0,
 	progress: 0,
 	duration: 0,
 	queue: [],
@@ -127,6 +132,18 @@ function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
 			return {...state, volume: newVolume};
 		}
 
+		case 'VOLUME_FINE_UP': {
+			const newVolume = Math.min(100, state.volume + 1);
+			playerService.setVolume(newVolume);
+			return {...state, volume: newVolume};
+		}
+
+		case 'VOLUME_FINE_DOWN': {
+			const newVolume = Math.max(0, state.volume - 1);
+			playerService.setVolume(newVolume);
+			return {...state, volume: newVolume};
+		}
+
 		case 'TOGGLE_SHUFFLE':
 			return {...state, shuffle: !state.shuffle};
 
@@ -199,6 +216,12 @@ function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
 		case 'SET_ERROR':
 			return {...state, error: action.error, isLoading: false};
 
+		case 'SET_SPEED': {
+			const clampedSpeed = Math.max(0.25, Math.min(4.0, action.speed));
+			playerService.setSpeed(clampedSpeed);
+			return {...state, speed: clampedSpeed};
+		}
+
 		case 'RESTORE_STATE':
 			logger.info('PlayerReducer', 'RESTORE_STATE', {
 				hasTrack: !!action.currentTrack,
@@ -235,6 +258,8 @@ type PlayerContextValue = {
 	setVolume: (volume: number) => void;
 	volumeUp: () => void;
 	volumeDown: () => void;
+	volumeFineUp: () => void;
+	volumeFineDown: () => void;
 	toggleShuffle: () => void;
 	toggleRepeat: () => void;
 	setQueue: (queue: Track[]) => void;
@@ -242,6 +267,9 @@ type PlayerContextValue = {
 	removeFromQueue: (index: number) => void;
 	clearQueue: () => void;
 	setQueuePosition: (position: number) => void;
+	setSpeed: (speed: number) => void;
+	speedUp: () => void;
+	speedDown: () => void;
 };
 
 import {getConfigService} from '../services/config/config.service.ts';
@@ -255,6 +283,16 @@ function PlayerManager() {
 	const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 	const musicService = getMusicService();
 	const playerService = getPlayerService();
+
+	// Initialize MPRIS (Linux only, no-ops on other platforms)
+	useEffect(() => {
+		void getMprisService().initialize({
+			onPlay: () => dispatch({category: 'RESUME'}),
+			onPause: () => dispatch({category: 'PAUSE'}),
+			onNext: () => dispatch({category: 'NEXT'}),
+			onPrevious: () => dispatch({category: 'PREVIOUS'}),
+		});
+	}, [dispatch]);
 
 	// Register event handler for mpv IPC events
 	useEffect(() => {
@@ -338,32 +376,89 @@ function PlayerManager() {
 		const loadAndPlayTrack = async () => {
 			dispatch({category: 'SET_LOADING', loading: true});
 
-			try {
-				logger.debug('PlayerManager', 'Starting playback with mpv', {
-					videoId: track.videoId,
-					volume: state.volume,
-				});
+			const MAX_RETRIES = 3;
+			const RETRY_DELAY_MS = 1500;
 
-				// Pass YouTube URL directly to mpv (it handles stream extraction via yt-dlp)
-				const youtubeUrl = `https://www.youtube.com/watch?v=${track.videoId}`;
+			for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+				try {
+					logger.debug('PlayerManager', 'Starting playback with mpv', {
+						videoId: track.videoId,
+						volume: state.volume,
+						attempt,
+					});
 
-				await playerService.play(youtubeUrl, {
-					volume: state.volume,
-				});
+					// Pass YouTube URL directly to mpv (it handles stream extraction via yt-dlp)
+					const youtubeUrl = `https://www.youtube.com/watch?v=${track.videoId}`;
+					const config = getConfigService();
+					const artists =
+						track.artists?.map(a => a.name).join(', ') ?? 'Unknown';
 
-				logger.info('PlayerManager', 'Playback started successfully');
-				dispatch({category: 'SET_LOADING', loading: false});
-			} catch (error) {
-				logger.error('PlayerManager', 'Failed to load track', {
-					error: error instanceof Error ? error.message : String(error),
-					stack: error instanceof Error ? error.stack : undefined,
-					track: {title: track.title, videoId: track.videoId},
-				});
-				dispatch({
-					category: 'SET_ERROR',
-					error:
-						error instanceof Error ? error.message : 'Failed to load track',
-				});
+					// Fire desktop notification if enabled (only on first attempt)
+					if (attempt === 1 && config.get('notifications')) {
+						const notificationService = getNotificationService();
+						notificationService.setEnabled(true);
+						void notificationService.notifyTrackChange(track.title, artists);
+					}
+
+					// Discord Rich Presence
+					if (config.get('discordRichPresence')) {
+						const discord = getDiscordRpcService();
+						discord.setEnabled(true);
+						void discord.connect().then(() =>
+							discord.updateActivity({
+								title: track.title,
+								artist: artists,
+								startTimestamp: Date.now(),
+							}),
+						);
+					}
+
+					// MPRIS (Linux)
+					const mpris = getMprisService();
+					mpris.updateTrack(
+						{
+							title: track.title,
+							artist: artists,
+							duration: (track.duration ?? 0) * 1_000_000,
+						},
+						true,
+					);
+
+					await playerService.play(youtubeUrl, {
+						volume: state.volume,
+						audioNormalization: config.get('audioNormalization') ?? false,
+						proxy: config.get('proxy'),
+					});
+
+					logger.info('PlayerManager', 'Playback started successfully', {
+						attempt,
+					});
+					dispatch({category: 'SET_LOADING', loading: false});
+					return; // Success
+				} catch (error) {
+					logger.error('PlayerManager', 'Failed to load track', {
+						error: error instanceof Error ? error.message : String(error),
+						track: {title: track.title, videoId: track.videoId},
+						attempt,
+					});
+
+					if (attempt < MAX_RETRIES) {
+						logger.info('PlayerManager', 'Retrying playback', {
+							attempt,
+							nextAttempt: attempt + 1,
+							delayMs: RETRY_DELAY_MS,
+						});
+						await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+					} else {
+						dispatch({
+							category: 'SET_ERROR',
+							error:
+								error instanceof Error
+									? `${error.message} (after ${MAX_RETRIES} attempts)`
+									: 'Failed to load track',
+						});
+					}
+				}
 			}
 		};
 
@@ -386,6 +481,40 @@ function PlayerManager() {
 
 		return undefined;
 	}, [state.isPlaying, state.currentTrack, dispatch]);
+
+	// Scrobble when >50% of track has been played
+	const scrobbledRef = useRef<string | null>(null);
+	useEffect(() => {
+		if (
+			state.currentTrack &&
+			state.duration > 0 &&
+			state.progress / state.duration > 0.5 &&
+			scrobbledRef.current !== state.currentTrack.videoId
+		) {
+			scrobbledRef.current = state.currentTrack.videoId;
+			const config = getConfigService();
+			const scrobblingConfig = config.get('scrobbling');
+			if (scrobblingConfig) {
+				const scrobbler = getScrobblingService();
+				scrobbler.configure(scrobblingConfig);
+				const artist = state.currentTrack.artists?.[0]?.name ?? 'Unknown';
+				void scrobbler.scrobble({
+					title: state.currentTrack.title,
+					artist,
+					duration: state.duration,
+				});
+			}
+		}
+
+		if (
+			state.currentTrack &&
+			scrobbledRef.current !== state.currentTrack.videoId &&
+			state.progress < 1
+		) {
+			// New track started — reset so we can scrobble again
+			scrobbledRef.current = null;
+		}
+	}, [state.progress, state.duration, state.currentTrack]);
 
 	// Handle play/pause state
 	useEffect(() => {
@@ -545,6 +674,12 @@ export function PlayerProvider({children}: {children: ReactNode}) {
 				logger.debug('PlayerActions', 'volumeDown called');
 				dispatch({category: 'VOLUME_DOWN'});
 			},
+			volumeFineUp: () => {
+				dispatch({category: 'VOLUME_FINE_UP'});
+			},
+			volumeFineDown: () => {
+				dispatch({category: 'VOLUME_FINE_DOWN'});
+			},
 			toggleShuffle: () => dispatch({category: 'TOGGLE_SHUFFLE'}),
 			toggleRepeat: () => dispatch({category: 'TOGGLE_REPEAT'}),
 			setQueue: (queue: Track[]) => dispatch({category: 'SET_QUEUE', queue}),
@@ -554,8 +689,15 @@ export function PlayerProvider({children}: {children: ReactNode}) {
 			clearQueue: () => dispatch({category: 'CLEAR_QUEUE'}),
 			setQueuePosition: (position: number) =>
 				dispatch({category: 'SET_QUEUE_POSITION', position}),
+			setSpeed: (speed: number) => dispatch({category: 'SET_SPEED', speed}),
+			speedUp: () => {
+				dispatch({category: 'SET_SPEED', speed: (state.speed ?? 1.0) + 0.25});
+			},
+			speedDown: () => {
+				dispatch({category: 'SET_SPEED', speed: (state.speed ?? 1.0) - 0.25});
+			},
 		}),
-		[dispatch], // dispatch is stable, but include for correctness
+		[dispatch, state.speed], // dispatch is stable, but include for correctness
 	);
 
 	const contextValue = useMemo(

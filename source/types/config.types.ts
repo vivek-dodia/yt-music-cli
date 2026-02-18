@@ -10,14 +10,37 @@ export interface KeybindingConfig {
 }
 
 export interface Config {
-	theme: 'dark' | 'light' | 'midnight' | 'matrix' | 'custom';
+	theme:
+		| 'dark'
+		| 'light'
+		| 'midnight'
+		| 'matrix'
+		| 'dracula'
+		| 'nord'
+		| 'solarized'
+		| 'catppuccin'
+		| 'custom';
 	volume: number;
 	keybindings: Record<string, KeybindingConfig>;
 	playlists: Playlist[];
 	history: string[];
+	searchHistory: string[];
 	favorites: string[];
 	repeat: RepeatMode;
 	shuffle: boolean;
 	customTheme?: Theme;
 	streamQuality?: 'low' | 'medium' | 'high';
+	audioNormalization?: boolean;
+	notifications?: boolean;
+	scrobbling?: {
+		lastfm?: {
+			apiKey?: string;
+			sessionKey?: string;
+		};
+		listenbrainz?: {
+			token?: string;
+		};
+	};
+	discordRichPresence?: boolean;
+	proxy?: string;
 }

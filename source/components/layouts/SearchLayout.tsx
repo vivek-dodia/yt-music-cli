@@ -8,7 +8,7 @@ import type {SearchResult} from '../../types/youtube-music.types.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import SearchBar from '../search/SearchBar.tsx';
 import {useKeyBinding} from '../../hooks/useKeyboard.ts';
-import {KEYBINDINGS} from '../../utils/constants.ts';
+import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {Box, Text} from 'ink';
 
 function SearchLayout() {
@@ -54,6 +54,15 @@ function SearchLayout() {
 
 	useKeyBinding(KEYBINDINGS.INCREASE_RESULTS, increaseLimit);
 	useKeyBinding(KEYBINDINGS.DECREASE_RESULTS, decreaseLimit);
+
+	// Open search history
+	const goToHistory = useCallback(() => {
+		if (isTyping) {
+			dispatch({category: 'NAVIGATE', view: VIEW.SEARCH_HISTORY});
+		}
+	}, [isTyping, dispatch]);
+
+	useKeyBinding(['h'], goToHistory);
 
 	// Initial search if query is in state (usually from CLI flags)
 	useEffect(() => {
@@ -134,8 +143,8 @@ function SearchLayout() {
 			{/* Instructions */}
 			<Text color={theme.colors.dim}>
 				{isTyping
-					? 'Type to search, Enter to start'
-					: 'Arrows to navigate, Enter to play, Esc to type again'}
+					? 'Type to search, Enter to start, H for history'
+					: `Arrows to navigate, Enter to play, ]/[ more/fewer results (${navState.searchLimit}), Esc to type`}
 			</Text>
 		</Box>
 	);

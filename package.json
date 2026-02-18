@@ -32,7 +32,8 @@
 		"test": "prettier --check . && xo && ava",
 		"typecheck": "tsc --noEmit",
 		"changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-		"clean": "rimraf dist"
+		"clean": "rimraf dist",
+		"release": "powershell -File scripts/release.ps1"
 	},
 	"xo": {
 		"extends": "xo-react",
@@ -59,6 +60,7 @@
 		"ink-text-input": "^6.0.0",
 		"jiti": "^2.6.1",
 		"meow": "^14.0.0",
+		"node-notifier": "^10.0.1",
 		"node-youtube-music": "^0.10.3",
 		"play-sound": "^1.1.6",
 		"react": "^19.2.4",
@@ -68,6 +70,7 @@
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@sindresorhus/tsconfig": "^8.1.0",
+		"@types/node-notifier": "^8.0.5",
 		"@types/react": "^19.2.14",
 		"@vdemedes/prettier-config": "^2.0.1",
 		"ava": "^6.4.1",

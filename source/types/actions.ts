@@ -44,6 +44,14 @@ export interface VolumeDownAction {
 	readonly category: 'VOLUME_DOWN';
 }
 
+export interface VolumeFineUpAction {
+	readonly category: 'VOLUME_FINE_UP';
+}
+
+export interface VolumeFineDownAction {
+	readonly category: 'VOLUME_FINE_DOWN';
+}
+
 export interface ToggleShuffleAction {
 	readonly category: 'TOGGLE_SHUFFLE';
 }
@@ -111,6 +119,11 @@ export interface RestoreStateAction {
 	repeat: 'off' | 'all' | 'one';
 }
 
+export interface SetSpeedAction {
+	readonly category: 'SET_SPEED';
+	speed: number;
+}
+
 // Navigation actions
 export interface NavigateAction {
 	readonly category: 'NAVIGATE';
@@ -149,4 +162,8 @@ export interface SetHasSearchedAction {
 export interface SetSearchLimitAction {
 	readonly category: 'SET_SEARCH_LIMIT';
 	limit: number;
+}
+
+export interface TogglePlayerModeAction {
+	readonly category: 'TOGGLE_PLAYER_MODE';
 }

@@ -23,11 +23,15 @@ class ConfigService {
 			keybindings: {},
 			playlists: [],
 			history: [],
+			searchHistory: [],
 			favorites: [],
 			repeat: 'off',
 			shuffle: false,
 			customTheme: undefined,
 			streamQuality: 'high',
+			audioNormalization: false,
+			notifications: false,
+			discordRichPresence: false,
 		};
 	}
 
@@ -75,6 +79,10 @@ class ConfigService {
 			| 'light'
 			| 'midnight'
 			| 'matrix'
+			| 'dracula'
+			| 'nord'
+			| 'solarized'
+			| 'catppuccin'
 			| 'custom';
 		this.save();
 	}
@@ -120,6 +128,20 @@ class ConfigService {
 
 	getHistory(): string[] {
 		return this.config.history;
+	}
+
+	addToSearchHistory(query: string): void {
+		const trimmed = query.trim();
+		if (!trimmed) return;
+		this.config.searchHistory = [
+			trimmed,
+			...(this.config.searchHistory ?? []).filter(q => q !== trimmed),
+		].slice(0, 100);
+		this.save();
+	}
+
+	getSearchHistory(): string[] {
+		return this.config.searchHistory ?? [];
 	}
 
 	addFavorite(trackId: string): void {

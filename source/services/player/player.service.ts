@@ -5,6 +5,8 @@ import {logger} from '../logger/logger.service.ts';
 
 export type PlayOptions = {
 	volume?: number;
+	audioNormalization?: boolean;
+	proxy?: string;
 };
 
 export type PlayerEventCallback = (event: {
@@ -268,7 +270,7 @@ class PlayerService {
 				});
 
 				// Spawn mpv with JSON IPC for better control
-				this.mpvProcess = spawn('mpv', [
+				const mpvArgs = [
 					'--no-video', // Audio only
 					'--no-terminal', // Don't read from stdin
 					`--volume=${this.currentVolume}`,
@@ -277,8 +279,22 @@ class PlayerService {
 					'--msg-level=all=error', // Only show errors
 					`--input-ipc-server=${this.ipcPath}`, // Enable IPC
 					'--idle=yes', // Keep mpv running after playback ends
-					playUrl,
-				]);
+					'--cache=yes', // Enable cache for network streams
+					'--cache-secs=30', // Buffer 30 seconds ahead
+					'--network-timeout=10', // 10s network timeout
+				];
+
+				if (options?.audioNormalization) {
+					mpvArgs.push('--af=dynaudnorm');
+				}
+
+				if (options?.proxy) {
+					mpvArgs.push(`--http-proxy=${options.proxy}`);
+				}
+
+				mpvArgs.push(playUrl);
+
+				this.mpvProcess = spawn('mpv', mpvArgs);
 
 				if (!this.mpvProcess.stdout || !this.mpvProcess.stderr) {
 					throw new Error('Failed to create mpv process streams');
@@ -421,6 +437,14 @@ class PlayerService {
 
 	getVolume(): number {
 		return this.currentVolume;
+	}
+
+	setSpeed(speed: number): void {
+		const clamped = Math.max(0.25, Math.min(4.0, speed));
+		logger.debug('PlayerService', 'setSpeed() called', {speed: clamped});
+		if (this.ipcSocket && !this.ipcSocket.destroyed) {
+			this.sendIpcCommand(['set_property', 'speed', clamped]);
+		}
 	}
 
 	isCurrentlyPlaying(): boolean {

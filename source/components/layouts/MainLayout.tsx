@@ -8,11 +8,17 @@ import {useTheme} from '../../hooks/useTheme.ts';
 import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import SearchLayout from './SearchLayout.tsx';
 import PlayerLayout from './PlayerLayout.tsx';
+import MiniPlayerLayout from './MiniPlayerLayout.tsx';
 import PluginsLayout from './PluginsLayout.tsx';
 import Suggestions from '../player/Suggestions.tsx';
 import Settings from '../settings/Settings.tsx';
 import ConfigLayout from '../config/ConfigLayout.tsx';
 import ShortcutsBar from '../common/ShortcutsBar.tsx';
+import LyricsLayout from './LyricsLayout.tsx';
+import SearchHistory from '../search/SearchHistory.tsx';
+import KeybindingsLayout from '../config/KeybindingsLayout.tsx';
+import TrendingLayout from './TrendingLayout.tsx';
+import ExploreLayout from './ExploreLayout.tsx';
 import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {Box} from 'ink';
 import {useTerminalSize} from '../../hooks/useTerminalSize.ts';
@@ -55,6 +61,22 @@ function MainLayout() {
 		dispatch({category: 'GO_BACK'});
 	}, [navState.currentView, dispatch]);
 
+	const goToLyrics = useCallback(() => {
+		dispatch({category: 'NAVIGATE', view: VIEW.LYRICS});
+	}, [dispatch]);
+
+	const goToTrending = useCallback(() => {
+		dispatch({category: 'NAVIGATE', view: VIEW.TRENDING});
+	}, [dispatch]);
+
+	const goToExplore = useCallback(() => {
+		dispatch({category: 'NAVIGATE', view: VIEW.EXPLORE});
+	}, [dispatch]);
+
+	const togglePlayerMode = useCallback(() => {
+		dispatch({category: 'TOGGLE_PLAYER_MODE'});
+	}, [dispatch]);
+
 	// Global keyboard bindings
 	useKeyBinding(KEYBINDINGS.QUIT, handleQuit);
 	useKeyBinding(KEYBINDINGS.SEARCH, goToSearch);
@@ -62,16 +84,35 @@ function MainLayout() {
 	useKeyBinding(KEYBINDINGS.SUGGESTIONS, goToSuggestions);
 	useKeyBinding(KEYBINDINGS.SETTINGS, goToSettings);
 	useKeyBinding(KEYBINDINGS.HELP, goToHelp);
+	useKeyBinding(['m'], togglePlayerMode);
+	useKeyBinding(['l'], goToLyrics);
+	useKeyBinding(['T'], goToTrending);
+	useKeyBinding(['e'], goToExplore);
 
 	// Memoize the view component to prevent unnecessary remounts
 	// Only recreate when currentView actually changes
 	const currentView = useMemo(() => {
+		// In mini mode, only show the mini player bar
+		if (navState.playerMode === 'mini') {
+			return <MiniPlayerLayout key="mini-player" />;
+		}
+
 		switch (navState.currentView) {
 			case 'player':
 				return <PlayerLayout key="player" />;
 
 			case 'search':
 				return <SearchLayout key="search" />;
+
+			case 'search_history':
+				return (
+					<SearchHistory
+						key="search_history"
+						onSelect={query => {
+							dispatch({category: 'SET_SEARCH_QUERY', query});
+						}}
+					/>
+				);
 
 			case 'playlists':
 				return <PlaylistList key="playlists" />;
@@ -88,13 +129,25 @@ function MainLayout() {
 			case 'config':
 				return <ConfigLayout key="config" />;
 
+			case 'lyrics':
+				return <LyricsLayout key="lyrics" />;
+
+			case 'keybindings':
+				return <KeybindingsLayout key="keybindings" />;
+
+			case 'trending':
+				return <TrendingLayout key="trending" />;
+
+			case 'explore':
+				return <ExploreLayout key="explore" />;
+
 			case 'help':
 				return <Help key="help" />;
 
 			default:
 				return <PlayerLayout key="player-default" />;
 		}
-	}, [navState.currentView]);
+	}, [navState.currentView, navState.playerMode, dispatch]);
 
 	return (
 		<Box

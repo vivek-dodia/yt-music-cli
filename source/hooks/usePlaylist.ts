@@ -3,6 +3,8 @@ import {getConfigService} from '../services/config/config.service.ts';
 import type {Playlist, Track} from '../types/youtube-music.types.ts';
 import {useState, useCallback, useEffect} from 'react';
 
+export type AddTrackResult = 'added' | 'duplicate';
+
 export function usePlaylist() {
 	const [playlists, setPlaylists] = useState<Playlist[]>([]);
 	const configService = getConfigService();
@@ -38,17 +40,27 @@ export function usePlaylist() {
 	);
 
 	const addTrackToPlaylist = useCallback(
-		(playlistId: string, track: Track) => {
+		(playlistId: string, track: Track, force = false): AddTrackResult => {
 			const playlistIndex = playlists.findIndex(
 				p => p.playlistId === playlistId,
 			);
-			if (playlistIndex === -1) return;
+			if (playlistIndex === -1) return 'added';
+
+			const playlist = playlists[playlistIndex]!;
+			const isDuplicate = playlist.tracks.some(
+				t => t.videoId === track.videoId,
+			);
+
+			if (isDuplicate && !force) {
+				return 'duplicate';
+			}
 
 			const updatedPlaylists = [...playlists];
 			updatedPlaylists[playlistIndex]!.tracks.push(track);
 
 			setPlaylists(updatedPlaylists);
 			configService.set('playlists', updatedPlaylists);
+			return 'added';
 		},
 		[playlists, configService],
 	);

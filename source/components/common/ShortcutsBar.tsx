@@ -18,6 +18,8 @@ export default function ShortcutsBar() {
 		previous,
 		volumeUp,
 		volumeDown,
+		volumeFineUp,
+		volumeFineDown,
 	} = usePlayer();
 
 	// Register key bindings globally
@@ -38,6 +40,8 @@ export default function ShortcutsBar() {
 	useKeyBinding(KEYBINDINGS.PREVIOUS, previous);
 	useKeyBinding(KEYBINDINGS.VOLUME_UP, volumeUp);
 	useKeyBinding(KEYBINDINGS.VOLUME_DOWN, volumeDown);
+	useKeyBinding(KEYBINDINGS.VOLUME_FINE_UP, volumeFineUp);
+	useKeyBinding(KEYBINDINGS.VOLUME_FINE_DOWN, volumeFineDown);
 	useKeyBinding(KEYBINDINGS.SETTINGS, goConfig);
 
 	return (

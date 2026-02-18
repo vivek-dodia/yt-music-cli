@@ -14,6 +14,7 @@ export const CONFIG_FILE = `${CONFIG_DIR}/config.json`;
 export const VIEW = {
 	PLAYER: 'player',
 	SEARCH: 'search',
+	SEARCH_HISTORY: 'search_history',
 	PLAYLISTS: 'playlists',
 	ARTIST: 'artist',
 	ALBUM: 'album',
@@ -22,6 +23,10 @@ export const VIEW = {
 	SETTINGS: 'settings',
 	CONFIG: 'config',
 	PLUGINS: 'plugins',
+	LYRICS: 'lyrics',
+	KEYBINDINGS: 'keybindings',
+	TRENDING: 'trending',
+	EXPLORE: 'explore',
 } as const;
 
 // Search types
@@ -49,10 +54,14 @@ export const KEYBINDINGS = {
 	PREVIOUS: ['b', 'left'],
 	VOLUME_UP: ['='], // Only '=' without shift, since '+' requires shift and causes issues
 	VOLUME_DOWN: ['-'], // Only '-' without shift
+	VOLUME_FINE_UP: ['shift+='], // Fine-grained +1 step
+	VOLUME_FINE_DOWN: ['shift+-'], // Fine-grained -1 step
 	SHUFFLE: ['s'],
 	REPEAT: ['r'],
 	SEEK_FORWARD: ['shift+right'],
 	SEEK_BACKWARD: ['shift+left'],
+	SPEED_UP: ['>'],
+	SPEED_DOWN: ['<'],
 
 	// Navigation
 	UP: ['up', 'k'],
