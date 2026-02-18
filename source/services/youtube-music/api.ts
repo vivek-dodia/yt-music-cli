@@ -297,18 +297,40 @@ class MusicService {
 	async getSuggestions(trackId: string): Promise<Track[]> {
 		try {
 			const yt = await getClient();
-			const video = (await yt.getInfo(trackId)) as unknown as VideoInfo;
-			const suggestions = video.related?.contents || [];
-			return suggestions.slice(0, 10).map((item: RelatedContent) => ({
-				videoId: item.id || '',
-				title:
-					typeof item.title === 'string'
-						? item.title
-						: item.title?.text || 'Unknown',
-				artists: [],
-			}));
+
+			let video: VideoInfo | null = null;
+			try {
+				video = (await yt.getInfo(trackId)) as unknown as VideoInfo;
+			} catch (error) {
+				logger.warn('MusicService', 'getSuggestions getInfo failed', {
+					error: error instanceof Error ? error.message : String(error),
+				});
+				return [];
+			}
+
+			const suggestions = video?.related?.contents ?? [];
+			const tracks: Track[] = [];
+
+			for (const item of suggestions) {
+				const videoId = (item as RelatedContent)?.id || '';
+				if (!videoId) continue;
+
+				const title =
+					typeof item.title === 'string' ? item.title : item.title?.text;
+				if (!title) continue;
+
+				tracks.push({
+					videoId,
+					title,
+					artists: [],
+				});
+			}
+
+			return tracks.slice(0, 10);
 		} catch (error) {
-			console.error('Failed to get suggestions:', error);
+			logger.error('MusicService', 'getSuggestions failed', {
+				error: error instanceof Error ? error.message : String(error),
+			});
 			return [];
 		}
 	}
