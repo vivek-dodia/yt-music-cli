@@ -25,8 +25,8 @@ export default function PlaylistList() {
 
 	const handleCreate = useCallback(() => {
 		const name = `Playlist ${playlists.length + 1}`;
-		createPlaylist(name);
-		setLastCreated(name);
+		const playlist = createPlaylist(name);
+		setLastCreated(playlist.name);
 		setSelectedIndex(playlists.length);
 	}, [createPlaylist, playlists.length]);
 

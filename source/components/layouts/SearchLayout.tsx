@@ -2,7 +2,7 @@
 import {useNavigation} from '../../hooks/useNavigation.ts';
 import {useYouTubeMusic} from '../../hooks/useYouTubeMusic.ts';
 import SearchResults from '../search/SearchResults.tsx';
-import {useState, useCallback, useEffect} from 'react';
+import {useState, useCallback, useEffect, useRef} from 'react';
 import React from 'react';
 import type {SearchResult} from '../../types/youtube-music.types.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
@@ -18,6 +18,8 @@ function SearchLayout() {
 	const [results, setResults] = useState<SearchResult[]>([]);
 	const [isTyping, setIsTyping] = useState(true);
 	const [isSearching, setIsSearching] = useState(false);
+	const [mixMessage, setMixMessage] = useState<string | null>(null);
+	const mixTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	// Handle search action
 	const performSearch = useCallback(
@@ -85,6 +87,25 @@ function SearchLayout() {
 
 	useKeyBinding(KEYBINDINGS.BACK, goBack);
 
+	const handleMixCreated = useCallback((message: string) => {
+		setMixMessage(message);
+		if (mixTimeoutRef.current) {
+			clearTimeout(mixTimeoutRef.current);
+		}
+		mixTimeoutRef.current = setTimeout(() => {
+			setMixMessage(null);
+			mixTimeoutRef.current = null;
+		}, 4000);
+	}, []);
+
+	useEffect(() => {
+		return () => {
+			if (mixTimeoutRef.current) {
+				clearTimeout(mixTimeoutRef.current);
+			}
+		};
+	}, []);
+
 	// Reset search state when leaving view
 	useEffect(() => {
 		return () => {
@@ -132,6 +153,7 @@ function SearchLayout() {
 					results={results}
 					selectedIndex={navState.selectedResult}
 					isActive={!isTyping}
+					onMixCreated={handleMixCreated}
 				/>
 			)}
 
@@ -141,10 +163,11 @@ function SearchLayout() {
 			)}
 
 			{/* Instructions */}
+			{mixMessage && <Text color={theme.colors.accent}>{mixMessage}</Text>}
 			<Text color={theme.colors.dim}>
 				{isTyping
 					? 'Type to search, Enter to start, Esc to clear'
-					: `Arrows to navigate, Enter to play, ]/[ more/fewer results (${navState.searchLimit}), H for history, Esc to type`}
+					: `Arrows to navigate, Enter to play, M to create mix, ]/[ more/fewer results (${navState.searchLimit}), H for history, Esc to type`}
 			</Text>
 		</Box>
 	);

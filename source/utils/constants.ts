@@ -81,6 +81,7 @@ export const KEYBINDINGS = {
 	ADD_TO_PLAYLIST: ['a'],
 	REMOVE_FROM_PLAYLIST: ['d'],
 	CREATE_PLAYLIST: ['c'],
+	CREATE_MIX: ['m'],
 	DELETE_PLAYLIST: ['D'],
 } as const;
 

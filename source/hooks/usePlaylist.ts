@@ -14,16 +14,17 @@ export function usePlaylist() {
 	}, []);
 
 	const createPlaylist = useCallback(
-		(name: string) => {
+		(name: string, tracks: Track[] = []) => {
 			const newPlaylist: Playlist = {
 				playlistId: Date.now().toString(),
 				name,
-				tracks: [],
+				tracks: tracks.map(track => ({...track})),
 			};
 
 			const updatedPlaylists = [...playlists, newPlaylist];
 			setPlaylists(updatedPlaylists);
 			configService.set('playlists', updatedPlaylists);
+			return newPlaylist;
 		},
 		[playlists, configService],
 	);

@@ -4,7 +4,7 @@
 	"description": "- A Commandline music player for youtube-music",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/involvex/youtube-music-cli"
+		"url": "git+https://github.com/involvex/youtube-music-cli.git"
 	},
 	"funding": "https://github.com/sponsors/involvex",
 	"license": "MIT",

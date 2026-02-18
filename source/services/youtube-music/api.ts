@@ -328,9 +328,14 @@ class MusicService {
 
 			return tracks.slice(0, 10);
 		} catch (error) {
-			logger.error('MusicService', 'getSuggestions failed', {
-				error: error instanceof Error ? error.message : String(error),
-			});
+			const message = error instanceof Error ? error.message : String(error);
+			if (message.includes('ParsingError')) {
+				logger.warn('MusicService', 'getSuggestions parsing error', {
+					error: message,
+				});
+			} else {
+				logger.error('MusicService', 'getSuggestions failed', {error: message});
+			}
 			return [];
 		}
 	}
