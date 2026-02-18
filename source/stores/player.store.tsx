@@ -248,13 +248,21 @@ function PlayerManager() {
 
 	// Register event handler for mpv IPC events
 	useEffect(() => {
+		let lastProgressUpdate = 0;
+		const PROGRESS_THROTTLE_MS = 1000; // Update progress max once per second
+
 		playerService.onEvent(event => {
 			if (event.duration !== undefined) {
 				dispatch({category: 'SET_DURATION', duration: event.duration});
 			}
 
 			if (event.timePos !== undefined) {
-				dispatch({category: 'UPDATE_PROGRESS', progress: event.timePos});
+				// Throttle progress updates to reduce re-renders
+				const now = Date.now();
+				if (now - lastProgressUpdate >= PROGRESS_THROTTLE_MS) {
+					dispatch({category: 'UPDATE_PROGRESS', progress: event.timePos});
+					lastProgressUpdate = now;
+				}
 			}
 
 			if (event.paused !== undefined) {
@@ -284,7 +292,7 @@ function PlayerManager() {
 			}
 			playerService.stop();
 		};
-	}, [dispatch]);
+	}, [dispatch, playerService]);
 
 	// Handle track changes
 	useEffect(() => {
@@ -463,15 +471,18 @@ export function PlayerProvider({children}: {children: ReactNode}) {
 
 	// Save immediately on unmount/quit
 	useEffect(() => {
+		const stateRef = {current: state}; // Capture state in ref for exit handler
+
 		const handleExit = () => {
+			const currentState = stateRef.current;
 			void savePlayerState({
-				currentTrack: state.currentTrack,
-				queue: state.queue,
-				queuePosition: state.queuePosition,
-				progress: state.progress,
-				volume: state.volume,
-				shuffle: state.shuffle,
-				repeat: state.repeat,
+				currentTrack: currentState.currentTrack,
+				queue: currentState.queue,
+				queuePosition: currentState.queuePosition,
+				progress: currentState.progress,
+				volume: currentState.volume,
+				shuffle: currentState.shuffle,
+				repeat: currentState.repeat,
 			});
 		};
 
@@ -479,13 +490,18 @@ export function PlayerProvider({children}: {children: ReactNode}) {
 		process.on('SIGINT', handleExit);
 		process.on('SIGTERM', handleExit);
 
+		// Update ref when state changes
+		stateRef.current = state;
+
 		return () => {
 			handleExit(); // Save on component unmount
 			process.off('beforeExit', handleExit);
 			process.off('SIGINT', handleExit);
 			process.off('SIGTERM', handleExit);
 		};
-	}, [state]);
+		// Only register handlers once, update via ref
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const actions = useMemo(
 		() => ({

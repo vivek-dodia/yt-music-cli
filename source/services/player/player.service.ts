@@ -334,6 +334,7 @@ class PlayerService {
 
 	pause(): void {
 		logger.debug('PlayerService', 'pause() called');
+		this.isPlaying = false;
 		if (this.ipcSocket && !this.ipcSocket.destroyed) {
 			this.sendIpcCommand(['set_property', 'pause', true]);
 		}
@@ -341,10 +342,17 @@ class PlayerService {
 
 	resume(): void {
 		logger.debug('PlayerService', 'resume() called');
+		this.isPlaying = true;
 		if (this.ipcSocket && !this.ipcSocket.destroyed) {
 			this.sendIpcCommand(['set_property', 'pause', false]);
+			// Reapply volume after resume to ensure audio isn't muted
+			if (this.currentVolume !== undefined) {
+				setTimeout(() => {
+					this.sendIpcCommand(['set_property', 'volume', this.currentVolume]);
+				}, 100);
+			}
 		} else if (!this.isPlaying && this.currentUrl) {
-			void this.play(this.currentUrl);
+			void this.play(this.currentUrl, {volume: this.currentVolume});
 		}
 	}
 
