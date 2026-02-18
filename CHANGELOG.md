@@ -1,3 +1,9 @@
+## [0.0.11](https://github.com/involvex/youtube-music-cli/compare/v0.0.10...v0.0.11) (2026-02-18)
+
+### Features
+
+- **download:** add track, artist, and playlist downloads ([42298d2](https://github.com/involvex/youtube-music-cli/commit/42298d2fd35ba71ad841f58e140f4c53b3222ed7))
+
 ## [0.0.10](https://github.com/involvex/youtube-music-cli/compare/v0.0.9...v0.0.10) (2026-02-18)
 
 ### Bug Fixes
