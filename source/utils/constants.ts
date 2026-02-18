@@ -41,7 +41,7 @@ export const SEARCH_TYPE = {
 // Keybindings
 export const KEYBINDINGS = {
 	// Global
-	QUIT: ['q', 'escape'],
+	QUIT: ['q'],
 	HELP: ['?'],
 	SEARCH: ['/'],
 	PLAYLISTS: ['shift+p'],

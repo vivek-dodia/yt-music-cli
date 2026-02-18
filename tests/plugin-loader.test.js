@@ -1,4 +1,4 @@
-import {mkdtempSync, writeFileSync} from 'node:fs';
+import {mkdtempSync, mkdirSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import test from 'ava';
@@ -9,7 +9,14 @@ import {pathToFileURL} from 'node:url';
 register('ts-node/esm', pathToFileURL('./'));
 
 test('loads and initializes a plugin from disk', async t => {
-	const dir = mkdtempSync(join(tmpdir(), 'plugin-'));
+	const testRoot = join(
+		tmpdir(),
+		'youtube-music-cli.tmp-test',
+		'plugin-loader',
+	);
+	rmSync(testRoot, {recursive: true, force: true});
+	mkdirSync(testRoot, {recursive: true});
+	const dir = mkdtempSync(join(testRoot, 'plugin-'));
 	const manifest = {
 		id: 'test-plugin',
 		name: 'Test Plugin',

@@ -163,15 +163,15 @@ youtube-music-cli play dQw4w9WgXcQ --shuffle
 
 ### Global
 
-| Key         | Action          |
-| ----------- | --------------- |
-| `?`         | Show help       |
-| `/`         | Search          |
-| `p`         | Plugins manager |
-| `g`         | Suggestions     |
-| `,`         | Settings        |
-| `q` / `Esc` | Quit / Go back  |
-| `Ctrl+L`    | Refresh screen  |
+| Key   | Action          |
+| ----- | --------------- |
+| `?`   | Show help       |
+| `/`   | Search          |
+| `p`   | Plugins manager |
+| `g`   | Suggestions     |
+| `,`   | Settings        |
+| `Esc` | Go back         |
+| `q`   | Quit            |
 
 ### Playback
 
@@ -309,7 +309,7 @@ mpv --version
 
 ### TUI rendering issues
 
-Press `Ctrl+L` to refresh the screen, or try a different terminal emulator.
+If rendering looks wrong, try resizing your terminal window or restarting the app.
 
 ### Plugin not loading
 
