@@ -117,9 +117,13 @@ export function useYouTubeMusic() {
 				const suggestions = await musicService.getSuggestions(trackId);
 				return suggestions;
 			} catch (err) {
-				setError(
-					err instanceof Error ? err.message : 'Failed to get suggestions',
-				);
+				// Suppress YouTubeJS parsing errors (library limitation with YouTube's changing API)
+				// These are not user-actionable and create noise in the UI
+				const errorMessage =
+					err instanceof Error ? err.message : 'Failed to get suggestions';
+				if (!errorMessage.includes('ParsingError')) {
+					setError(errorMessage);
+				}
 				return [];
 			} finally {
 				setIsLoading(false);

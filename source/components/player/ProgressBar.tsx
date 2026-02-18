@@ -15,7 +15,7 @@ export default function ProgressBar() {
 	const progress = playerState.progress;
 	const duration = playerState.duration;
 	const percentage = duration > 0 ? Math.floor((progress / duration) * 100) : 0;
-	const barWidth = Math.floor(percentage / 5); // 20 chars max, so 20% per char
+	const barWidth = Math.max(0, Math.min(20, Math.floor(percentage / 5))); // 20 chars max, bounds checked
 
 	return (
 		<Box flexDirection="column" marginTop={1}>

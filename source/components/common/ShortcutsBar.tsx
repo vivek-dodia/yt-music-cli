@@ -53,6 +53,7 @@ export default function ShortcutsBar() {
 				<Text color={theme.colors.text}>n</Text> Next |{' '}
 				<Text color={theme.colors.text}>p</Text> Previous |{' '}
 				<Text color={theme.colors.text}>/</Text> Search |{' '}
+				<Text color={theme.colors.text}>,</Text> Settings |{' '}
 				<Text color={theme.colors.text}>?</Text> Help |{' '}
 				<Text color={theme.colors.text}>q</Text> Quit
 			</Text>
