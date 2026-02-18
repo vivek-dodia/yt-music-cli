@@ -1,12 +1,15 @@
 // Shortcuts bar component
 import {Box, Text} from 'ink';
+import {useCallback} from 'react';
 import {usePlayer} from '../../hooks/usePlayer.ts';
+import {useNavigation} from '../../hooks/useNavigation.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import {KEYBINDINGS} from '../../utils/constants.ts';
 
 export default function ShortcutsBar() {
 	const {theme} = useTheme();
+	const {dispatch: navDispatch} = useNavigation();
 	const {
 		state: playerState,
 		pause,
@@ -26,11 +29,16 @@ export default function ShortcutsBar() {
 		}
 	};
 
+	const goConfig = useCallback(() => {
+		navDispatch({category: 'NAVIGATE', view: 'config'});
+	}, [navDispatch]);
+
 	useKeyBinding(KEYBINDINGS.PLAY_PAUSE, handlePlayPause);
 	useKeyBinding(KEYBINDINGS.NEXT, next);
 	useKeyBinding(KEYBINDINGS.PREVIOUS, previous);
 	useKeyBinding(KEYBINDINGS.VOLUME_UP, volumeUp);
 	useKeyBinding(KEYBINDINGS.VOLUME_DOWN, volumeDown);
+	useKeyBinding(KEYBINDINGS.SETTINGS, goConfig);
 
 	return (
 		<Box

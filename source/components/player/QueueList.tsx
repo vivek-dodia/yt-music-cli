@@ -74,13 +74,6 @@ function QueueList() {
 					);
 				},
 			)}
-
-			{/* Instructions */}
-			<Box marginTop={1}>
-				<Text color={theme.colors.dim}>
-					Arrows to navigate, Enter to select
-				</Text>
-			</Box>
 		</Box>
 	);
 }

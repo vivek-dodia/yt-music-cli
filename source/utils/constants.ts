@@ -20,6 +20,7 @@ export const VIEW = {
 	HELP: 'help',
 	SUGGESTIONS: 'suggestions',
 	SETTINGS: 'settings',
+	CONFIG: 'config',
 } as const;
 
 // Search types

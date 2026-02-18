@@ -10,6 +10,7 @@ import SearchLayout from './SearchLayout.tsx';
 import PlayerLayout from './PlayerLayout.tsx';
 import Suggestions from '../player/Suggestions.tsx';
 import Settings from '../settings/Settings.tsx';
+import ConfigLayout from '../config/ConfigLayout.tsx';
 import ShortcutsBar from '../common/ShortcutsBar.tsx';
 import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {Box} from 'ink';
@@ -77,6 +78,9 @@ function MainLayout() {
 
 			case 'settings':
 				return <Settings key="settings" />;
+
+			case 'config':
+				return <ConfigLayout key="config" />;
 
 			case 'help':
 				return <Help key="help" />;
