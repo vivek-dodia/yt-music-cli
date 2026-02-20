@@ -105,7 +105,7 @@ brew install involvex/youtube-music-cli/youtube-music-cli
 winget install Involvex.YoutubeMusicCLI
 ```
 
-> Maintainers: tag pushes trigger `.github/workflows/homebrew-publish.yml` and `.github/workflows/winget-publish.yml`. Set `WINGETCREATE_TOKEN` and make sure `Involvex.YoutubeMusicCLI` exists in winget-pkgs for automated updates.
+> Maintainers: tag pushes trigger `.github/workflows/homebrew-publish.yml` and `.github/workflows/winget-publish.yml`. Homebrew uses the tap format `involvex/youtube-music-cli/youtube-music-cli`, so ensure the formula file exists on the default branch at `Formula/youtube-music-cli.rb` for the tap installation to work. Set `WINGETCREATE_TOKEN` and make sure `Involvex.YoutubeMusicCLI` exists in winget-pkgs for automated updates.
 
 ### From Source
 

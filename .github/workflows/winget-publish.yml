@@ -60,14 +60,35 @@ jobs:
 
           throw "Timed out waiting for $assetName on tag $tagName."
 
+      - name: Validate Winget token
+        shell: pwsh
+        env:
+          WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGETCREATE_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINGET_CREATE_GITHUB_TOKEN)) {
+            throw 'WINGETCREATE_TOKEN secret is required. Set this in repository settings under Secrets and variables > Actions.'
+          }
+
+          $headers = @{
+            Authorization = "Bearer $env:WINGET_CREATE_GITHUB_TOKEN"
+            Accept = 'application/vnd.github+json'
+            'X-GitHub-Api-Version' = '2022-11-28'
+          }
+
+          try {
+            Invoke-RestMethod -Uri 'https://api.github.com/repos/microsoft/winget-pkgs' -Headers $headers | Out-Null
+          } catch {
+            throw 'WINGETCREATE_TOKEN is invalid or missing required access. Use a GitHub PAT with at least public_repo scope.'
+          }
+
       - name: Update Winget package
         shell: pwsh
         env:
-          WINGETCREATE_TOKEN: ${{ secrets.WINGETCREATE_TOKEN }}
+          WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGETCREATE_TOKEN }}
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:WINGETCREATE_TOKEN)) {
+          if ([string]::IsNullOrWhiteSpace($env:WINGET_CREATE_GITHUB_TOKEN)) {
             throw 'WINGETCREATE_TOKEN secret is required.'
           }
 
           $version = '${{ env.TAG_NAME }}'.TrimStart('v')
-          wingetcreate update $env:PACKAGE_IDENTIFIER --version $version --urls '${{ steps.release-asset.outputs.installer_url }}' --token $env:WINGETCREATE_TOKEN --submit
+          wingetcreate update $env:PACKAGE_IDENTIFIER --version $version --urls '${{ steps.release-asset.outputs.installer_url }}' --submit

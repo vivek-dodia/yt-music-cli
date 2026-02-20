@@ -61,7 +61,7 @@ function buildLastfmSignature(
 		.sort()
 		.map(k => `${k}${params[k]}`)
 		.join('');
-	return createHash('md5')
+	return createHash('sha256')
 		.update(sorted + secret)
 		.digest('hex');
 }

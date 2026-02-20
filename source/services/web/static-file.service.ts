@@ -1,7 +1,7 @@
 // Static file serving service for web UI
 import {readFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
-import {extname, join, dirname} from 'node:path';
+import {extname, join, dirname, normalize, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {logger} from '../logger/logger.service.ts';
 
@@ -62,6 +62,26 @@ class StaticFileService {
 	private getMimeType(filePath: string): string {
 		const ext = extname(filePath).toLowerCase();
 		return MIME_TYPES[ext] || 'application/octet-stream';
+	}
+
+	private resolveSafeFilePath(urlPath: string): string | null {
+		let decodedPath: string;
+		try {
+			decodedPath = decodeURIComponent(urlPath);
+		} catch {
+			return null;
+		}
+
+		const relativePath = normalize(decodedPath).replace(/^[\\/]+/, '');
+		const rootPath = resolve(this.webDistDir);
+		const resolvedPath = resolve(rootPath, relativePath);
+		const rootPrefix = rootPath.endsWith(sep) ? rootPath : `${rootPath}${sep}`;
+
+		if (resolvedPath !== rootPath && !resolvedPath.startsWith(rootPrefix)) {
+			return null;
+		}
+
+		return resolvedPath;
 	}
 
 	/**
@@ -130,7 +150,12 @@ class StaticFileService {
 		}
 
 		// Serve static files
-		const filePath = join(this.webDistDir, urlPath);
+		const filePath = this.resolveSafeFilePath(urlPath);
+		if (!filePath) {
+			res.writeHead(400, {'Content-Type': 'text/plain'});
+			res.end('Bad Request');
+			return;
+		}
 
 		try {
 			// Check if file exists
