@@ -75,12 +75,18 @@ function MainLayout() {
 	}, [dispatch]);
 
 	const goToExplore = useCallback(() => {
-		dispatch({category: 'NAVIGATE', view: VIEW.EXPLORE});
-	}, [dispatch]);
+		// Don't navigate to explore if we're in plugins view (e key is used for enable/disable there)
+		if (navState.currentView !== VIEW.PLUGINS) {
+			dispatch({category: 'NAVIGATE', view: VIEW.EXPLORE});
+		}
+	}, [dispatch, navState.currentView]);
 
 	const goToImport = useCallback(() => {
-		dispatch({category: 'NAVIGATE', view: VIEW.IMPORT});
-	}, [dispatch]);
+		// Don't navigate to import if we're in plugins view (i key is used for plugin install there)
+		if (navState.currentView !== VIEW.PLUGINS) {
+			dispatch({category: 'NAVIGATE', view: VIEW.IMPORT});
+		}
+	}, [dispatch, navState.currentView]);
 
 	const togglePlayerMode = useCallback(() => {
 		dispatch({category: 'TOGGLE_PLAYER_MODE'});

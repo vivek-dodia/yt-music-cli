@@ -50,11 +50,7 @@ class StaticFileService {
 
 		this.webDistDir = join(projectRoot, 'dist', 'web');
 
-		console.log('[StaticFileService] Path resolution:', {
-			currentFile,
-			currentDir,
-			isDist,
-			projectRoot,
+		logger.debug('StaticFileService', 'Path resolved', {
 			webDistDir: this.webDistDir,
 			exists: existsSync(this.webDistDir),
 		});
@@ -75,20 +71,13 @@ class StaticFileService {
 		if (this.indexHtmlLoaded) return;
 
 		const indexPath = join(this.webDistDir, 'index.html');
-		console.log('[StaticFileService] Loading index.html:', {
-			webDistDir: this.webDistDir,
-			indexPath,
-			exists: existsSync(indexPath),
-		});
 
 		try {
 			const buffer = await readFile(indexPath);
 			this.indexHtml = buffer.toString('utf-8');
 			this.indexHtmlLoaded = true;
-			logger.debug('StaticFileService', 'index.html loaded', {indexPath});
-			console.log('[StaticFileService] index.html loaded successfully');
+			logger.info('StaticFileService', 'index.html loaded');
 		} catch (error) {
-			console.error('[StaticFileService] Failed to load index.html:', error);
 			logger.error('StaticFileService', 'Failed to load index.html', {
 				indexPath,
 				error: error instanceof Error ? error.message : String(error),

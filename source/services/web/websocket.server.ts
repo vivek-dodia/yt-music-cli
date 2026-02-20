@@ -7,18 +7,24 @@ import {
 import {WebSocketServer, WebSocket} from 'ws';
 import type {WebServerConfig} from '../../types/web.types.ts';
 import type {ServerMessage, ClientMessage} from '../../types/web.types.ts';
+import type {PlayerAction} from '../../types/player.types.ts';
 import {getWebStreamingService} from './web-streaming.service.ts';
 import {getStaticFileService} from './static-file.service.ts';
 import {logger} from '../logger/logger.service.ts';
 
 interface WebSocketServerOptions {
 	config: WebServerConfig;
-	onCommand?: (action: unknown) => void;
+	onCommand?: (action: PlayerAction) => void;
 	onImportRequest?: (
 		source: 'spotify' | 'youtube',
 		url: string,
 		name?: string,
 	) => void;
+	onSearchRequest?: (
+		query: string,
+		searchType: 'all' | 'songs' | 'artists' | 'albums' | 'playlists',
+	) => void;
+	onConfigUpdate?: (config: Record<string, unknown>) => void;
 }
 
 class WebSocketServerClass {
@@ -27,12 +33,17 @@ class WebSocketServerClass {
 	private config: WebServerConfig;
 	private streamingService = getWebStreamingService();
 	private staticFileService = getStaticFileService();
-	private onCommand?: (action: unknown) => void;
+	private onCommand?: (action: PlayerAction) => void;
 	private onImportRequest?: (
 		source: 'spotify' | 'youtube',
 		url: string,
 		name?: string,
 	) => void;
+	private onSearchRequest?: (
+		query: string,
+		searchType: 'all' | 'songs' | 'artists' | 'albums' | 'playlists',
+	) => void;
+	private onConfigUpdate?: (config: Record<string, unknown>) => void;
 
 	constructor() {
 		this.config = {
@@ -52,6 +63,8 @@ class WebSocketServerClass {
 		this.config = options.config;
 		this.onCommand = options.onCommand;
 		this.onImportRequest = options.onImportRequest;
+		this.onSearchRequest = options.onSearchRequest;
+		this.onConfigUpdate = options.onConfigUpdate;
 
 		logger.info('WebSocketServer', 'Starting server', {
 			host: this.config.host,
@@ -213,6 +226,18 @@ class WebSocketServerClass {
 			case 'import-request':
 				if (this.onImportRequest) {
 					this.onImportRequest(message.source, message.url, message.name);
+				}
+				break;
+
+			case 'search-request':
+				if (this.onSearchRequest) {
+					this.onSearchRequest(message.query, message.searchType);
+				}
+				break;
+
+			case 'config-update':
+				if (this.onConfigUpdate) {
+					this.onConfigUpdate(message.config as Record<string, unknown>);
 				}
 				break;
 

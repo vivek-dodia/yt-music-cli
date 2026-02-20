@@ -19,6 +19,12 @@ export interface Album {
 	artists: Artist[];
 }
 
+export interface Playlist {
+	playlistId: string;
+	name: string;
+	tracks: Track[];
+}
+
 export interface PlayerState {
 	currentTrack: Track | null;
 	isPlaying: boolean;
@@ -78,18 +84,45 @@ export interface PlayerAction {
 	repeat?: 'off' | 'all' | 'one';
 }
 
+export interface SearchResult {
+	type: 'song' | 'album' | 'artist' | 'playlist';
+	data: Track | Album | Artist | Playlist;
+}
+
 export interface ServerMessage {
-	type: 'state-update' | 'event' | 'error' | 'auth';
+	type:
+		| 'state-update'
+		| 'event'
+		| 'error'
+		| 'auth'
+		| 'search-results'
+		| 'config-update';
 	state?: Partial<PlayerState>;
 	event?: string;
 	data?: unknown;
 	error?: string;
+	results?: SearchResult[];
+	config?: Partial<Config>;
 }
 
 export interface ClientMessage {
-	type: 'command' | 'auth-request';
+	type: 'command' | 'auth-request' | 'search-request' | 'config-update';
 	action?: PlayerAction;
 	token?: string;
+	query?: string;
+	searchType?: 'all' | 'songs' | 'artists' | 'albums' | 'playlists';
+	config?: Partial<Config>;
+}
+
+export interface Config {
+	theme: string;
+	volume: number;
+	repeat: 'off' | 'all' | 'one';
+	shuffle: boolean;
+	streamQuality: 'low' | 'medium' | 'high';
+	audioNormalization: boolean;
+	notifications: boolean;
+	discordRichPresence: boolean;
 }
 
 export interface ImportProgress {

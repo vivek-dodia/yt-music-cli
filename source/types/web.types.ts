@@ -2,6 +2,7 @@
 
 import type {PlayerAction, PlayerState} from './player.types.ts';
 import type {ImportProgress, ImportResult} from './import.types.ts';
+import type {Track, Album, Artist, Playlist} from './youtube-music.types.ts';
 
 /** WebSocket server message types */
 export type ServerMessage =
@@ -10,7 +11,9 @@ export type ServerMessage =
 	| ErrorMessage
 	| AuthMessage
 	| ImportProgressMessage
-	| ImportResultMessage;
+	| ImportResultMessage
+	| SearchResultsMessage
+	| ConfigUpdateMessage;
 
 /** Player state update message */
 export interface StateUpdateMessage {
@@ -55,11 +58,31 @@ export interface ImportResultMessage {
 	data: ImportResult;
 }
 
+/** Search results message */
+export interface SearchResultsMessage {
+	type: 'search-results';
+	results: SearchResult[];
+}
+
+/** Search result item */
+export interface SearchResult {
+	type: 'song' | 'album' | 'artist' | 'playlist';
+	data: Track | Album | Artist | Playlist;
+}
+
+/** Configuration update message */
+export interface ConfigUpdateMessage {
+	type: 'config-update';
+	config: Partial<Config>;
+}
+
 /** WebSocket client message types */
 export type ClientMessage =
 	| CommandMessage
 	| AuthRequestMessage
-	| ImportRequestMessage;
+	| ImportRequestMessage
+	| SearchRequestMessage
+	| ConfigUpdateRequestMessage;
 
 /** Command message from client */
 export interface CommandMessage {
@@ -79,6 +102,31 @@ export interface ImportRequestMessage {
 	source: 'spotify' | 'youtube';
 	url: string;
 	name?: string;
+}
+
+/** Search request from client */
+export interface SearchRequestMessage {
+	type: 'search-request';
+	query: string;
+	searchType: 'all' | 'songs' | 'artists' | 'albums' | 'playlists';
+}
+
+/** Config update request from client */
+export interface ConfigUpdateRequestMessage {
+	type: 'config-update';
+	config: Partial<Config>;
+}
+
+/** Configuration interface */
+export interface Config {
+	theme: string;
+	volume: number;
+	repeat: 'off' | 'all' | 'one';
+	shuffle: boolean;
+	streamQuality: 'low' | 'medium' | 'high';
+	audioNormalization: boolean;
+	notifications: boolean;
+	discordRichPresence: boolean;
 }
 
 /** WebSocket client information */
