@@ -20,9 +20,12 @@ import KeybindingsLayout from '../config/KeybindingsLayout.tsx';
 import TrendingLayout from './TrendingLayout.tsx';
 import ExploreLayout from './ExploreLayout.tsx';
 import ImportLayout from '../import/ImportLayout.tsx';
+import ExportLayout from '../export/ExportLayout.tsx';
 import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {Box} from 'ink';
 import {useTerminalSize} from '../../hooks/useTerminalSize.ts';
+import {getPlayerService} from '../../services/player/player.service.ts';
+import {getConfigService} from '../../services/config/config.service.ts';
 
 function MainLayout() {
 	const {theme} = useTheme();
@@ -88,6 +91,23 @@ function MainLayout() {
 		}
 	}, [dispatch, navState.currentView]);
 
+	const handleDetach = useCallback(() => {
+		// Detach mode: Exit CLI while keeping music playing
+		const player = getPlayerService();
+		const config = getConfigService();
+
+		// Get the IPC path and current URL before detaching
+		const {ipcPath, currentUrl} = player.detach();
+
+		// Save the background playback state if we have an active session
+		if (ipcPath && currentUrl) {
+			config.setBackgroundPlaybackState({ipcPath, currentUrl});
+		}
+
+		// Exit the app
+		process.exit(0);
+	}, []);
+
 	const togglePlayerMode = useCallback(() => {
 		dispatch({category: 'TOGGLE_PLAYER_MODE'});
 	}, [dispatch]);
@@ -105,6 +125,7 @@ function MainLayout() {
 	useKeyBinding(['T'], goToTrending);
 	useKeyBinding(['e'], goToExplore);
 	useKeyBinding(['i'], goToImport);
+	useKeyBinding(KEYBINDINGS.DETACH, handleDetach);
 
 	// Memoize the view component to prevent unnecessary remounts
 	// Only recreate when currentView actually changes
@@ -160,6 +181,9 @@ function MainLayout() {
 
 			case 'import':
 				return <ImportLayout key="import" />;
+
+			case 'export_playlists':
+				return <ExportLayout key="export_playlists" />;
 
 			case 'help':
 				return <Help key="help" />;

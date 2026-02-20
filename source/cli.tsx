@@ -9,6 +9,9 @@ import {getPluginRegistryService} from './services/plugin/plugin-registry.servic
 import {getImportService} from './services/import/import.service.ts';
 import {getWebServerManager} from './services/web/web-server-manager.ts';
 import {getWebStreamingService} from './services/web/web-streaming.service.ts';
+import {getVersionCheckService} from './services/version-check/version-check.service.ts';
+import {getConfigService} from './services/config/config.service.ts';
+import {APP_VERSION} from './utils/constants.ts';
 
 const cli = meow(
 	`
@@ -384,6 +387,29 @@ if (command === 'plugins') {
 			}
 		})();
 	} else {
+		// Check for updates before rendering the app (skip in web-only mode)
+		if (!cli.flags.webOnly) {
+			void (async () => {
+				const versionCheck = getVersionCheckService();
+				const config = getConfigService();
+				const lastCheck = config.getLastVersionCheck();
+
+				if (versionCheck.shouldCheck(lastCheck)) {
+					const result = await versionCheck.checkForUpdates(APP_VERSION);
+					config.setLastVersionCheck(versionCheck.markChecked());
+
+					if (result.hasUpdate) {
+						console.log('');
+						console.log(
+							` Update available: ${APP_VERSION} → ${result.latestVersion}`,
+						);
+						console.log('Run: npm install -g @involvex/youtube-music-cli');
+						console.log('');
+					}
+				}
+			})();
+		}
+
 		// Render the app
 		render(<App flags={cli.flags as Flags} />);
 	}

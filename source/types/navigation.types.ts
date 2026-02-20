@@ -9,6 +9,7 @@ import type {
 	SetHasSearchedAction,
 	SetSearchLimitAction,
 	TogglePlayerModeAction,
+	DetachAction,
 } from './actions.ts';
 
 export interface NavigationState {
@@ -34,4 +35,5 @@ export type NavigationAction =
 	| SetSelectedPlaylistAction
 	| SetHasSearchedAction
 	| SetSearchLimitAction
-	| TogglePlayerModeAction;
+	| TogglePlayerModeAction
+	| DetachAction;

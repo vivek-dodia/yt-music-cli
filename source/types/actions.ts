@@ -167,3 +167,7 @@ export interface SetSearchLimitAction {
 export interface TogglePlayerModeAction {
 	readonly category: 'TOGGLE_PLAYER_MODE';
 }
+
+export interface DetachAction {
+	readonly category: 'DETACH';
+}

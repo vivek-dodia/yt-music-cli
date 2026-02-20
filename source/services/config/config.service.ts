@@ -177,6 +177,47 @@ class ConfigService {
 	getFavorites(): string[] {
 		return this.config.favorites;
 	}
+
+	setBackgroundPlaybackState(state: {
+		ipcPath: string;
+		currentUrl: string;
+	}): void {
+		this.config.backgroundPlayback = {
+			enabled: true,
+			ipcPath: state.ipcPath,
+			currentUrl: state.currentUrl,
+			timestamp: new Date().toISOString(),
+		};
+		this.save();
+	}
+
+	getBackgroundPlaybackState():
+		| {enabled: true; ipcPath: string; currentUrl: string; timestamp: string}
+		| {enabled: false} {
+		if (this.config.backgroundPlayback?.enabled) {
+			return {
+				enabled: true,
+				ipcPath: this.config.backgroundPlayback.ipcPath!,
+				currentUrl: this.config.backgroundPlayback.currentUrl!,
+				timestamp: this.config.backgroundPlayback.timestamp!,
+			};
+		}
+		return {enabled: false};
+	}
+
+	clearBackgroundPlaybackState(): void {
+		this.config.backgroundPlayback = undefined;
+		this.save();
+	}
+
+	setLastVersionCheck(timestamp: string): void {
+		this.config.lastVersionCheck = timestamp;
+		this.save();
+	}
+
+	getLastVersionCheck(): string | undefined {
+		return this.config.lastVersionCheck;
+	}
 }
 
 // Singleton instance

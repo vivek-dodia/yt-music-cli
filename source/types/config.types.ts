@@ -49,4 +49,11 @@ export interface Config {
 	downloadDirectory?: string;
 	downloadFormat?: DownloadFormat;
 	webServer?: WebServerConfig;
+	backgroundPlayback?: {
+		enabled: boolean;
+		ipcPath?: string;
+		currentUrl?: string;
+		timestamp?: string;
+	};
+	lastVersionCheck?: string;
 }

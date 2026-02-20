@@ -453,6 +453,43 @@ class PlayerService {
 		this.ipcConnectRetries = 0;
 	}
 
+	/**
+	 * Detach mode: Save state and clear references without killing mpv process
+	 * Returns the IPC path and current URL for later reattachment
+	 */
+	detach(): {ipcPath: string | null; currentUrl: string | null} {
+		logger.info('PlayerService', 'Detaching from player', {
+			ipcPath: this.ipcPath,
+			currentUrl: this.currentUrl,
+		});
+
+		const info = {
+			ipcPath: this.ipcPath,
+			currentUrl: this.currentUrl,
+		};
+
+		// Clear references but DON'T kill mpv process - it keeps playing
+		this.mpvProcess = null;
+		this.ipcSocket = null;
+		this.ipcPath = null;
+		this.isPlaying = false;
+
+		return info;
+	}
+
+	/**
+	 * Reattach to an existing mpv process via IPC
+	 */
+	async reattach(ipcPath: string): Promise<void> {
+		logger.info('PlayerService', 'Reattaching to player', {ipcPath});
+
+		this.ipcPath = ipcPath;
+		await this.connectIpc();
+		this.isPlaying = true;
+
+		logger.info('PlayerService', 'Successfully reattached to player');
+	}
+
 	setVolume(volume: number): void {
 		logger.debug('PlayerService', 'setVolume() called', {
 			oldVolume: this.currentVolume,

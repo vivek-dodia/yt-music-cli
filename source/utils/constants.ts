@@ -1,6 +1,6 @@
 // Application constants
 export const APP_NAME = '@involvex/youtube-music-cli';
-export const APP_VERSION = '0.0.1';
+export const APP_VERSION = '0.0.20';
 
 // Config directory
 export const CONFIG_DIR =
@@ -28,6 +28,7 @@ export const VIEW = {
 	TRENDING: 'trending',
 	EXPLORE: 'explore',
 	IMPORT: 'import',
+	EXPORT_PLAYLISTS: 'export_playlists',
 } as const;
 
 // Search types
@@ -49,6 +50,7 @@ export const KEYBINDINGS = {
 	SUGGESTIONS: ['g'],
 	SETTINGS: [','],
 	PLUGINS: ['p'],
+	DETACH: ['shift+q'],
 
 	// Player
 	PLAY_PAUSE: [' '],
