@@ -1,3 +1,9 @@
+## [0.0.24](https://github.com/involvex/youtube-music-cli/compare/v0.0.23...v0.0.24) (2026-02-20)
+
+### Features
+
+- add YouTube URL support for play command ([c09e411](https://github.com/involvex/youtube-music-cli/commit/c09e411dd36e5670727d3914203c5c66de08457b))
+
 ## [0.0.23](https://github.com/involvex/youtube-music-cli/compare/v0.0.22...v0.0.23) (2026-02-20)
 
 ## [0.0.22](https://github.com/involvex/youtube-music-cli/compare/v0.0.21...v0.0.22) (2026-02-20)
