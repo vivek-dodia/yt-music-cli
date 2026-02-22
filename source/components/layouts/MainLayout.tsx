@@ -19,6 +19,7 @@ import SearchHistory from '../search/SearchHistory.tsx';
 import KeybindingsLayout from '../config/KeybindingsLayout.tsx';
 import TrendingLayout from './TrendingLayout.tsx';
 import ExploreLayout from './ExploreLayout.tsx';
+import HistoryLayout from './HistoryLayout.tsx';
 import ImportLayout from '../import/ImportLayout.tsx';
 import ExportLayout from '../export/ExportLayout.tsx';
 import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
@@ -56,6 +57,10 @@ function MainLayout() {
 
 	const goToSettings = useCallback(() => {
 		dispatch({category: 'NAVIGATE', view: VIEW.SETTINGS});
+	}, [dispatch]);
+
+	const goToHistory = useCallback(() => {
+		dispatch({category: 'NAVIGATE', view: VIEW.HISTORY});
 	}, [dispatch]);
 
 	const goToHelp = useCallback(() => {
@@ -148,6 +153,7 @@ function MainLayout() {
 	useKeyBinding(KEYBINDINGS.PLAYLISTS, goToPlaylists);
 	useKeyBinding(KEYBINDINGS.PLUGINS, goToPlugins);
 	useKeyBinding(KEYBINDINGS.SUGGESTIONS, goToSuggestions);
+	useKeyBinding(KEYBINDINGS.HISTORY, goToHistory);
 	useKeyBinding(KEYBINDINGS.SETTINGS, goToSettings);
 	useKeyBinding(KEYBINDINGS.HELP, goToHelp);
 	useKeyBinding(['M'], togglePlayerMode);
@@ -188,6 +194,9 @@ function MainLayout() {
 
 			case 'suggestions':
 				return <Suggestions key="suggestions" />;
+
+			case 'history':
+				return <HistoryLayout key="history" />;
 
 			case 'settings':
 				return <Settings key="settings" />;

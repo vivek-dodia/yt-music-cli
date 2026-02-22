@@ -29,6 +29,7 @@ export const VIEW = {
 	EXPLORE: 'explore',
 	IMPORT: 'import',
 	EXPORT_PLAYLISTS: 'export_playlists',
+	HISTORY: 'history',
 } as const;
 
 // Search types
@@ -48,6 +49,7 @@ export const KEYBINDINGS = {
 	SEARCH: ['/'],
 	PLAYLISTS: ['shift+p'],
 	SUGGESTIONS: ['g'],
+	HISTORY: ['shift+h'],
 	SETTINGS: [','],
 	PLUGINS: ['p'],
 	DETACH: ['shift+q'],

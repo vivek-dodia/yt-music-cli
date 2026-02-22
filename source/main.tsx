@@ -4,6 +4,7 @@ import {PluginsProvider} from './stores/plugins.store.tsx';
 import MainLayout from './components/layouts/MainLayout.tsx';
 import {ThemeProvider} from './contexts/theme.context.tsx';
 import {PlayerProvider} from './stores/player.store.tsx';
+import {HistoryProvider} from './stores/history.store.tsx';
 import {ErrorBoundary} from './components/common/ErrorBoundary.tsx';
 import {KeyboardManager} from './hooks/useKeyboard.ts';
 import {KeyboardBlockProvider} from './hooks/useKeyboardBlocker.tsx';
@@ -145,23 +146,25 @@ export default function Main({flags}: {flags?: Flags}) {
 		<ErrorBoundary>
 			<ThemeProvider>
 				<PlayerProvider>
-					<NavigationProvider>
-						<PluginsProvider>
-							<KeyboardBlockProvider>
-								<Box flexDirection="column">
-									<KeyboardManager />
-									{flags?.headless ? (
-										<HeadlessLayout flags={flags} />
-									) : (
-										<>
-											<Initializer flags={flags} />
-											<MainLayout />
-										</>
-									)}
-								</Box>
-							</KeyboardBlockProvider>
-						</PluginsProvider>
-					</NavigationProvider>
+					<HistoryProvider>
+						<NavigationProvider>
+							<PluginsProvider>
+								<KeyboardBlockProvider>
+									<Box flexDirection="column">
+										<KeyboardManager />
+										{flags?.headless ? (
+											<HeadlessLayout flags={flags} />
+										) : (
+											<>
+												<Initializer flags={flags} />
+												<MainLayout />
+											</>
+										)}
+									</Box>
+								</KeyboardBlockProvider>
+							</PluginsProvider>
+						</NavigationProvider>
+					</HistoryProvider>
 				</PlayerProvider>
 			</ThemeProvider>
 		</ErrorBoundary>
