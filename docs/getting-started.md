@@ -87,7 +87,8 @@ bun install -g @involvex/youtube-music-cli
 ### Homebrew
 
 ```bash
-brew install involvex/youtube-music-cli/youtube-music-cli
+brew tap involvex/youtube-music-cli https://github.com/involvex/youtube-music-cli.git
+brew install youtube-music-cli
 ```
 
 ### GitHub Releases

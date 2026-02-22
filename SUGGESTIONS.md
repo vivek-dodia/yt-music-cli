@@ -103,7 +103,7 @@ This document tracks potential features, enhancements, and improvements for yout
 
 ### Medium Priority
 
-- [ ] **Homebrew Formula** - Easy installation on macOS via `brew install`
+- [x] **Homebrew Formula** - Easy installation on macOS via `brew install`
 - [ ] **AUR Package** - Arch Linux package for `yay`/`paru` users
 - [ ] **Snap/Flatpak** - Linux universal packages for broader distro support
 - [ ] **Windows Installer** - MSI/EXE installer for Windows users
