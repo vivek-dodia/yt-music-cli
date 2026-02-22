@@ -46,6 +46,9 @@ class ConfigService {
 					enabled: false,
 				},
 			},
+			gaplessPlayback: true,
+			crossfadeDuration: 0,
+			equalizerPreset: 'flat',
 		};
 	}
 

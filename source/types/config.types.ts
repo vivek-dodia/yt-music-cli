@@ -5,6 +5,12 @@ import type {WebServerConfig} from './web.types.ts';
 
 export type RepeatMode = 'off' | 'all' | 'one';
 export type DownloadFormat = 'mp3' | 'm4a';
+export type EqualizerPreset =
+	| 'flat'
+	| 'bass_boost'
+	| 'vocal'
+	| 'bright'
+	| 'warm';
 
 export interface KeybindingConfig {
 	keys: string[];
@@ -33,6 +39,9 @@ export interface Config {
 	customTheme?: Theme;
 	streamQuality?: 'low' | 'medium' | 'high';
 	audioNormalization?: boolean;
+	gaplessPlayback?: boolean;
+	crossfadeDuration?: number;
+	equalizerPreset?: EqualizerPreset;
 	notifications?: boolean;
 	scrobbling?: {
 		lastfm?: {

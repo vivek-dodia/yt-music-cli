@@ -63,6 +63,9 @@ export const KEYBINDINGS = {
 	VOLUME_FINE_DOWN: ['shift+-'], // Fine-grained -1 step
 	SHUFFLE: ['shift+s'],
 	REPEAT: ['r'],
+	GAPLESS_TOGGLE: ['shift+g'],
+	CROSSFADE_CYCLE: ['shift+c'],
+	EQUALIZER_CYCLE: ['shift+e'],
 	SEEK_FORWARD: ['shift+right'],
 	SEEK_BACKWARD: ['shift+left'],
 	SPEED_UP: ['>'],
@@ -80,6 +83,10 @@ export const KEYBINDINGS = {
 	PREV_RESULT: ['shift+tab'],
 	INCREASE_RESULTS: [']'],
 	DECREASE_RESULTS: ['['],
+	SEARCH_FILTER_ARTIST: ['ctrl+a'],
+	SEARCH_FILTER_ALBUM: ['ctrl+l'],
+	SEARCH_FILTER_YEAR: ['ctrl+y'],
+	SEARCH_FILTER_DURATION: ['ctrl+d'],
 
 	// Playlist
 	ADD_TO_PLAYLIST: ['a'],

@@ -2,11 +2,29 @@
 import {spawn, type ChildProcess} from 'node:child_process';
 import {connect, type Socket} from 'node:net';
 import {logger} from '../logger/logger.service.ts';
+import type {EqualizerPreset} from '../../types/config.types.ts';
 
 export type PlayOptions = {
 	volume?: number;
 	audioNormalization?: boolean;
 	proxy?: string;
+	gaplessPlayback?: boolean;
+	crossfadeDuration?: number;
+	equalizerPreset?: EqualizerPreset;
+};
+
+const EQUALIZER_PRESET_FILTERS: Record<EqualizerPreset, string[]> = {
+	flat: [],
+	bass_boost: ['equalizer=f=60:width_type=o:width=2:g=5'],
+	vocal: ['equalizer=f=2500:width_type=o:width=2:g=3'],
+	bright: [
+		'equalizer=f=4000:width_type=o:width=2:g=3',
+		'equalizer=f=8000:width_type=o:width=2:g=2',
+	],
+	warm: [
+		'equalizer=f=100:width_type=o:width=2:g=4',
+		'equalizer=f=250:width_type=o:width=2:g=2',
+	],
 };
 
 export type PlayerEventCallback = (event: {
@@ -282,6 +300,24 @@ class PlayerService {
 					ipcPath: this.ipcPath,
 				});
 
+				const gapless = options?.gaplessPlayback ?? true;
+				const crossfadeDuration = Math.max(0, options?.crossfadeDuration ?? 0);
+				const eqPreset = options?.equalizerPreset ?? 'flat';
+				const audioFilters: string[] = [];
+
+				if (options?.audioNormalization) {
+					audioFilters.push('dynaudnorm');
+				}
+
+				if (crossfadeDuration > 0) {
+					audioFilters.push(`acrossfade=d=${crossfadeDuration}`);
+				}
+
+				const presetFilters = EQUALIZER_PRESET_FILTERS[eqPreset] ?? [];
+				if (presetFilters.length > 0) {
+					audioFilters.push(...presetFilters);
+				}
+
 				// Spawn mpv with JSON IPC for better control
 				const mpvArgs = [
 					'--no-video', // Audio only
@@ -295,10 +331,11 @@ class PlayerService {
 					'--cache=yes', // Enable cache for network streams
 					'--cache-secs=30', // Buffer 30 seconds ahead
 					'--network-timeout=10', // 10s network timeout
+					`--gapless-audio=${gapless ? 'yes' : 'no'}`,
 				];
 
-				if (options?.audioNormalization) {
-					mpvArgs.push('--af=dynaudnorm');
+				if (audioFilters.length > 0) {
+					mpvArgs.push(`--af=${audioFilters.join(',')}`);
 				}
 
 				if (options?.proxy) {

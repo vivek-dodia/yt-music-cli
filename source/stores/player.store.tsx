@@ -496,6 +496,9 @@ function PlayerManager() {
 						volume: state.volume,
 						audioNormalization: config.get('audioNormalization') ?? false,
 						proxy: config.get('proxy'),
+						gaplessPlayback: config.get('gaplessPlayback') ?? true,
+						crossfadeDuration: config.get('crossfadeDuration') ?? 0,
+						equalizerPreset: config.get('equalizerPreset') ?? 'flat',
 					});
 
 					logger.info('PlayerManager', 'Playback started successfully', {

@@ -16,6 +16,9 @@ youtube-music-cli stores its configuration in `~/.youtube-music-cli/config.json`
 	"shuffle": false,
 	"repeat": "off",
 	"streamQuality": "high",
+	"gaplessPlayback": true,
+	"crossfadeDuration": 0,
+	"equalizerPreset": "flat",
 	"downloadsEnabled": false,
 	"downloadDirectory": "D:/Music/youtube-music-cli",
 	"downloadFormat": "mp3"
@@ -92,6 +95,35 @@ Audio streaming quality.
 | `high`   | ~256kbps+ | Best quality (default) |
 
 **Note:** Change via Settings menu (`,` key) in the TUI.
+
+### gaplessPlayback
+
+Enable or disable mpv's gapless audio flag. When turned on (default), mpv will avoid inserting silence between tracks when possible.
+
+**Default:** `true`
+
+### crossfadeDuration
+
+Sets the duration in seconds used for mpv's acrossfade filter between tracks. The Settings menu cycles through Off (0s), 1s, 2s, 3s, and 5s values.
+
+**Default:** `0`
+
+### equalizerPreset
+
+Selects a preconfigured mpv equalizer stack (`flat`, `bass_boost`, `vocal`, `bright`, `warm`). The menu cycles through the presets so you can tailor tonal balance.
+
+**Default:** `flat`
+
+## Search Filters (TUI)
+
+Use the Search view's filter shortcuts to narrow down results:
+
+- `Ctrl+A`: Set an artist name fragment to match against artist/track metadata.
+- `Ctrl+L`: Set an album filter that matches album or playlist titles.
+- `Ctrl+Y`: Supply a year or numeric fragment that will be matched against track/album/playlist names.
+- `Ctrl+D`: Cycle through duration buckets (`Any`, `short <3m`, `medium 3-5m`, `long >5m`).
+
+Filters are applied client-side and will immediately update the results list without re-running the API search.
 
 ### downloadsEnabled
 

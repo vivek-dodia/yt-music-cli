@@ -10,14 +10,28 @@ import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {useSleepTimer} from '../../hooks/useSleepTimer.ts';
 import {formatTime} from '../../utils/format.ts';
 import {useKeyboardBlocker} from '../../hooks/useKeyboardBlocker.tsx';
-import type {DownloadFormat} from '../../types/config.types.ts';
+import type {
+	DownloadFormat,
+	EqualizerPreset,
+} from '../../types/config.types.ts';
 
 const QUALITIES: Array<'low' | 'medium' | 'high'> = ['low', 'medium', 'high'];
 const DOWNLOAD_FORMATS: DownloadFormat[] = ['mp3', 'm4a'];
+const CROSSFADE_PRESETS = [0, 1, 2, 3, 5];
+const EQUALIZER_PRESETS: EqualizerPreset[] = [
+	'flat',
+	'bass_boost',
+	'vocal',
+	'bright',
+	'warm',
+];
 
 const SETTINGS_ITEMS = [
 	'Stream Quality',
 	'Audio Normalization',
+	'Gapless Playback',
+	'Crossfade Duration',
+	'Equalizer Preset',
 	'Notifications',
 	'Discord Rich Presence',
 	'Downloads Enabled',
@@ -38,6 +52,15 @@ export default function Settings() {
 	const [quality, setQuality] = useState(config.get('streamQuality') || 'high');
 	const [audioNormalization, setAudioNormalization] = useState(
 		config.get('audioNormalization') ?? false,
+	);
+	const [gaplessPlayback, setGaplessPlayback] = useState(
+		config.get('gaplessPlayback') ?? true,
+	);
+	const [crossfadeDuration, setCrossfadeDuration] = useState(
+		config.get('crossfadeDuration') ?? 0,
+	);
+	const [equalizerPreset, setEqualizerPreset] = useState<EqualizerPreset>(
+		config.get('equalizerPreset') ?? 'flat',
 	);
 	const [notifications, setNotifications] = useState(
 		config.get('notifications') ?? false,
@@ -87,6 +110,35 @@ export default function Settings() {
 		config.set('audioNormalization', next);
 	};
 
+	const toggleGaplessPlayback = () => {
+		const next = !gaplessPlayback;
+		setGaplessPlayback(next);
+		config.set('gaplessPlayback', next);
+	};
+
+	const cycleCrossfadeDuration = () => {
+		const currentIndex = CROSSFADE_PRESETS.indexOf(crossfadeDuration);
+		const nextIndex =
+			currentIndex === -1 ? 0 : (currentIndex + 1) % CROSSFADE_PRESETS.length;
+		const next = CROSSFADE_PRESETS[nextIndex] ?? 0;
+		setCrossfadeDuration(next);
+		config.set('crossfadeDuration', next);
+	};
+
+	const cycleEqualizerPreset = () => {
+		const currentIndex = EQUALIZER_PRESETS.indexOf(equalizerPreset);
+		const nextPreset =
+			EQUALIZER_PRESETS[(currentIndex + 1) % EQUALIZER_PRESETS.length]!;
+		setEqualizerPreset(nextPreset);
+		config.set('equalizerPreset', nextPreset);
+	};
+
+	const formatEqualizerLabel = (preset: EqualizerPreset) =>
+		preset
+			.split('_')
+			.map(segment => `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`)
+			.join(' ');
+
 	const toggleNotifications = () => {
 		const next = !notifications;
 		setNotifications(next);
@@ -132,24 +184,30 @@ export default function Settings() {
 		} else if (selectedIndex === 1) {
 			toggleNormalization();
 		} else if (selectedIndex === 2) {
-			toggleNotifications();
+			toggleGaplessPlayback();
 		} else if (selectedIndex === 3) {
-			toggleDiscordRpc();
+			cycleCrossfadeDuration();
 		} else if (selectedIndex === 4) {
-			toggleDownloadsEnabled();
+			cycleEqualizerPreset();
 		} else if (selectedIndex === 5) {
-			setIsEditingDownloadDirectory(true);
+			toggleNotifications();
 		} else if (selectedIndex === 6) {
-			cycleDownloadFormat();
+			toggleDiscordRpc();
 		} else if (selectedIndex === 7) {
-			cycleSleepTimer();
+			toggleDownloadsEnabled();
 		} else if (selectedIndex === 8) {
-			dispatch({category: 'NAVIGATE', view: VIEW.IMPORT});
+			setIsEditingDownloadDirectory(true);
 		} else if (selectedIndex === 9) {
-			dispatch({category: 'NAVIGATE', view: VIEW.EXPORT_PLAYLISTS});
+			cycleDownloadFormat();
 		} else if (selectedIndex === 10) {
-			dispatch({category: 'NAVIGATE', view: VIEW.KEYBINDINGS});
+			cycleSleepTimer();
 		} else if (selectedIndex === 11) {
+			dispatch({category: 'NAVIGATE', view: VIEW.IMPORT});
+		} else if (selectedIndex === 12) {
+			dispatch({category: 'NAVIGATE', view: VIEW.EXPORT_PLAYLISTS});
+		} else if (selectedIndex === 13) {
+			dispatch({category: 'NAVIGATE', view: VIEW.KEYBINDINGS});
+		} else if (selectedIndex === 14) {
 			dispatch({category: 'NAVIGATE', view: VIEW.PLUGINS});
 		}
 	};
@@ -206,7 +264,7 @@ export default function Settings() {
 				</Text>
 			</Box>
 
-			{/* Notifications */}
+			{/* Gapless Playback */}
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
@@ -217,11 +275,11 @@ export default function Settings() {
 					}
 					bold={selectedIndex === 2}
 				>
-					Desktop Notifications: {notifications ? 'ON' : 'OFF'}
+					Gapless Playback: {gaplessPlayback ? 'ON' : 'OFF'}
 				</Text>
 			</Box>
 
-			{/* Discord Rich Presence */}
+			{/* Crossfade Duration */}
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
@@ -232,11 +290,11 @@ export default function Settings() {
 					}
 					bold={selectedIndex === 3}
 				>
-					Discord Rich Presence: {discordRpc ? 'ON' : 'OFF'}
+					Crossfade: {crossfadeDuration === 0 ? 'Off' : `${crossfadeDuration}s`}
 				</Text>
 			</Box>
 
-			{/* Downloads Enabled */}
+			{/* Equalizer Preset */}
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
@@ -247,20 +305,64 @@ export default function Settings() {
 					}
 					bold={selectedIndex === 4}
 				>
+					Equalizer: {formatEqualizerLabel(equalizerPreset)}
+				</Text>
+			</Box>
+
+			{/* Notifications */}
+			<Box paddingX={1}>
+				<Text
+					backgroundColor={
+						selectedIndex === 5 ? theme.colors.primary : undefined
+					}
+					color={
+						selectedIndex === 5 ? theme.colors.background : theme.colors.text
+					}
+					bold={selectedIndex === 5}
+				>
+					Desktop Notifications: {notifications ? 'ON' : 'OFF'}
+				</Text>
+			</Box>
+
+			{/* Discord Rich Presence */}
+			<Box paddingX={1}>
+				<Text
+					backgroundColor={
+						selectedIndex === 6 ? theme.colors.primary : undefined
+					}
+					color={
+						selectedIndex === 6 ? theme.colors.background : theme.colors.text
+					}
+					bold={selectedIndex === 6}
+				>
+					Discord Rich Presence: {discordRpc ? 'ON' : 'OFF'}
+				</Text>
+			</Box>
+
+			{/* Downloads Enabled */}
+			<Box paddingX={1}>
+				<Text
+					backgroundColor={
+						selectedIndex === 7 ? theme.colors.primary : undefined
+					}
+					color={
+						selectedIndex === 7 ? theme.colors.background : theme.colors.text
+					}
+					bold={selectedIndex === 7}
+				>
 					Download Feature: {downloadsEnabled ? 'ON' : 'OFF'}
 				</Text>
 			</Box>
 
 			{/* Download Folder */}
 			<Box paddingX={1}>
-				{isEditingDownloadDirectory && selectedIndex === 5 ? (
+				{isEditingDownloadDirectory && selectedIndex === 8 ? (
 					<TextInput
 						value={downloadDirectory}
 						onChange={setDownloadDirectory}
 						onSubmit={value => {
 							const normalized = value.trim();
 							if (!normalized) {
-								setDownloadDirectory(config.get('downloadDirectory') ?? '');
 								setIsEditingDownloadDirectory(false);
 								return;
 							}
@@ -274,12 +376,12 @@ export default function Settings() {
 				) : (
 					<Text
 						backgroundColor={
-							selectedIndex === 5 ? theme.colors.primary : undefined
+							selectedIndex === 8 ? theme.colors.primary : undefined
 						}
 						color={
-							selectedIndex === 5 ? theme.colors.background : theme.colors.text
+							selectedIndex === 8 ? theme.colors.background : theme.colors.text
 						}
-						bold={selectedIndex === 5}
+						bold={selectedIndex === 8}
 					>
 						Download Folder: {downloadDirectory}
 					</Text>
@@ -290,12 +392,12 @@ export default function Settings() {
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
-						selectedIndex === 6 ? theme.colors.primary : undefined
+						selectedIndex === 9 ? theme.colors.primary : undefined
 					}
 					color={
-						selectedIndex === 6 ? theme.colors.background : theme.colors.text
+						selectedIndex === 9 ? theme.colors.background : theme.colors.text
 					}
-					bold={selectedIndex === 6}
+					bold={selectedIndex === 9}
 				>
 					Download Format: {downloadFormat.toUpperCase()}
 				</Text>
@@ -305,16 +407,16 @@ export default function Settings() {
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
-						selectedIndex === 7 ? theme.colors.primary : undefined
+						selectedIndex === 10 ? theme.colors.primary : undefined
 					}
 					color={
-						selectedIndex === 7
+						selectedIndex === 10
 							? theme.colors.background
 							: isActive
 								? theme.colors.accent
 								: theme.colors.text
 					}
-					bold={selectedIndex === 7}
+					bold={selectedIndex === 10}
 				>
 					{sleepTimerLabel}
 				</Text>
@@ -324,12 +426,12 @@ export default function Settings() {
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
-						selectedIndex === 8 ? theme.colors.primary : undefined
+						selectedIndex === 11 ? theme.colors.primary : undefined
 					}
 					color={
-						selectedIndex === 8 ? theme.colors.background : theme.colors.text
+						selectedIndex === 11 ? theme.colors.background : theme.colors.text
 					}
-					bold={selectedIndex === 8}
+					bold={selectedIndex === 11}
 				>
 					Import Playlists →
 				</Text>
@@ -339,12 +441,12 @@ export default function Settings() {
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
-						selectedIndex === 9 ? theme.colors.primary : undefined
+						selectedIndex === 12 ? theme.colors.primary : undefined
 					}
 					color={
-						selectedIndex === 9 ? theme.colors.background : theme.colors.text
+						selectedIndex === 12 ? theme.colors.background : theme.colors.text
 					}
-					bold={selectedIndex === 9}
+					bold={selectedIndex === 12}
 				>
 					Export Playlists →
 				</Text>
@@ -354,12 +456,12 @@ export default function Settings() {
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
-						selectedIndex === 10 ? theme.colors.primary : undefined
+						selectedIndex === 13 ? theme.colors.primary : undefined
 					}
 					color={
-						selectedIndex === 10 ? theme.colors.background : theme.colors.text
+						selectedIndex === 13 ? theme.colors.background : theme.colors.text
 					}
-					bold={selectedIndex === 10}
+					bold={selectedIndex === 13}
 				>
 					Custom Keybindings →
 				</Text>
@@ -369,12 +471,12 @@ export default function Settings() {
 			<Box paddingX={1}>
 				<Text
 					backgroundColor={
-						selectedIndex === 11 ? theme.colors.primary : undefined
+						selectedIndex === 14 ? theme.colors.primary : undefined
 					}
 					color={
-						selectedIndex === 11 ? theme.colors.background : theme.colors.text
+						selectedIndex === 14 ? theme.colors.background : theme.colors.text
 					}
-					bold={selectedIndex === 11}
+					bold={selectedIndex === 14}
 				>
 					Manage Plugins
 				</Text>

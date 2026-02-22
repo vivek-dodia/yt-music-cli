@@ -40,3 +40,12 @@ export interface SearchOptions {
 	limit?: number;
 	continuation?: string;
 }
+
+export type SearchDurationFilter = 'all' | 'short' | 'medium' | 'long';
+
+export interface SearchFilters {
+	artist?: string;
+	album?: string;
+	year?: string;
+	duration?: SearchDurationFilter;
+}

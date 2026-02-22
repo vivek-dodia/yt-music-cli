@@ -3,6 +3,7 @@ import type {
 	NavigationState,
 	NavigationAction,
 } from '../types/navigation.types.ts';
+import type {SearchFilters} from '../types/youtube-music.types.ts';
 import {
 	createContext,
 	useContext,
@@ -10,6 +11,13 @@ import {
 	useMemo,
 	type ReactNode,
 } from 'react';
+
+const defaultSearchFilters: SearchFilters = {
+	artist: '',
+	album: '',
+	year: '',
+	duration: 'all',
+};
 
 const initialState: NavigationState = {
 	currentView: 'player',
@@ -23,6 +31,7 @@ const initialState: NavigationState = {
 	searchLimit: 10,
 	history: [],
 	playerMode: 'full',
+	searchFilters: defaultSearchFilters,
 };
 
 function navigationReducer(
@@ -57,6 +66,18 @@ function navigationReducer(
 
 		case 'SET_SEARCH_CATEGORY':
 			return {...state, searchCategory: action.category};
+
+		case 'SET_SEARCH_FILTERS':
+			return {
+				...state,
+				searchFilters: {...state.searchFilters, ...action.filters},
+			};
+
+		case 'CLEAR_SEARCH_FILTERS':
+			return {
+				...state,
+				searchFilters: defaultSearchFilters,
+			};
 
 		case 'SET_SELECTED_RESULT':
 			return {...state, selectedResult: action.index};

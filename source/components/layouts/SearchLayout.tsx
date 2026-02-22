@@ -2,9 +2,12 @@
 import {useNavigation} from '../../hooks/useNavigation.ts';
 import {useYouTubeMusic} from '../../hooks/useYouTubeMusic.ts';
 import SearchResults from '../search/SearchResults.tsx';
-import {useState, useCallback, useEffect, useRef} from 'react';
+import {useState, useCallback, useEffect, useRef, useMemo} from 'react';
 import React from 'react';
-import type {SearchResult} from '../../types/youtube-music.types.ts';
+import type {
+	SearchResult,
+	SearchDurationFilter,
+} from '../../types/youtube-music.types.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import SearchBar from '../search/SearchBar.tsx';
 import {useKeyBinding} from '../../hooks/useKeyboard.ts';
@@ -12,18 +15,77 @@ import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {Box, Text} from 'ink';
 import {usePlayer} from '../../hooks/usePlayer.ts';
 import {ICONS} from '../../utils/icons.ts';
+import TextInput from 'ink-text-input';
+import {applySearchFilters} from '../../utils/search-filters.ts';
+
+type FilterField = 'artist' | 'album' | 'year';
+
+const FILTER_LABELS: Record<FilterField, string> = {
+	artist: 'Artist',
+	album: 'Album',
+	year: 'Year',
+};
+
+const DURATION_ORDER: SearchDurationFilter[] = [
+	'all',
+	'short',
+	'medium',
+	'long',
+];
 
 function SearchLayout() {
 	const {theme} = useTheme();
 	const {state: navState, dispatch} = useNavigation();
 	const {state: playerState} = usePlayer();
 	const {isLoading, error, search} = useYouTubeMusic();
-	const [results, setResults] = useState<SearchResult[]>([]);
+	const [rawResults, setRawResults] = useState<SearchResult[]>([]);
+	const filteredResults = useMemo(
+		() => applySearchFilters(rawResults, navState.searchFilters),
+		[rawResults, navState.searchFilters],
+	);
 	const [isTyping, setIsTyping] = useState(true);
 	const [isSearching, setIsSearching] = useState(false);
 	const [actionMessage, setActionMessage] = useState<string | null>(null);
 	const actionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const lastAutoSearchedQueryRef = useRef<string | null>(null);
+	const [editingFilter, setEditingFilter] = useState<FilterField | null>(null);
+	const [filterDraft, setFilterDraft] = useState('');
+
+	const describeFilterValue = (value?: string) =>
+		value?.trim() ? value.trim() : 'Any';
+
+	const handleFilterSubmit = useCallback(
+		(value: string) => {
+			if (!editingFilter) return;
+			dispatch({
+				category: 'SET_SEARCH_FILTERS',
+				filters: {[editingFilter]: value.trim()},
+			});
+			setEditingFilter(null);
+			setFilterDraft('');
+		},
+		[dispatch, editingFilter],
+	);
+
+	const beginFilterEdit = useCallback(
+		(field: FilterField) => {
+			setEditingFilter(field);
+			setFilterDraft(navState.searchFilters[field] ?? '');
+		},
+		[navState.searchFilters],
+	);
+
+	const cycleDurationFilter = useCallback(() => {
+		const currentIndex = DURATION_ORDER.indexOf(
+			navState.searchFilters.duration ?? 'all',
+		);
+		const nextIndex = (currentIndex + 1) % DURATION_ORDER.length;
+		const nextDuration = DURATION_ORDER[nextIndex];
+		dispatch({
+			category: 'SET_SEARCH_FILTERS',
+			filters: {duration: nextDuration},
+		});
+	}, [dispatch, navState.searchFilters.duration]);
 
 	// Handle search action
 	const performSearch = useCallback(
@@ -37,7 +99,7 @@ function SearchLayout() {
 			});
 
 			if (response) {
-				setResults(response.results);
+				setRawResults(response.results);
 				dispatch({category: 'SET_SELECTED_RESULT', index: 0});
 				dispatch({category: 'SET_HAS_SEARCHED', hasSearched: true});
 				// Defer focus switch to avoid consuming the same Enter key
@@ -69,6 +131,14 @@ function SearchLayout() {
 	}, [isTyping, dispatch]);
 
 	useKeyBinding(['h'], goToHistory);
+	useKeyBinding(KEYBINDINGS.SEARCH_FILTER_ARTIST, () =>
+		beginFilterEdit('artist'),
+	);
+	useKeyBinding(KEYBINDINGS.SEARCH_FILTER_ALBUM, () =>
+		beginFilterEdit('album'),
+	);
+	useKeyBinding(KEYBINDINGS.SEARCH_FILTER_YEAR, () => beginFilterEdit('year'));
+	useKeyBinding(KEYBINDINGS.SEARCH_FILTER_DURATION, cycleDurationFilter);
 
 	// Initial search if query is in state (usually from CLI flags)
 	useEffect(() => {
@@ -89,13 +159,18 @@ function SearchLayout() {
 
 	// Handle going back
 	const goBack = useCallback(() => {
+		if (editingFilter) {
+			setEditingFilter(null);
+			setFilterDraft('');
+			return;
+		}
 		if (!isTyping) {
 			setIsTyping(true); // Back to typing if in results
 			dispatch({category: 'SET_HAS_SEARCHED', hasSearched: false});
 		} else {
 			dispatch({category: 'GO_BACK'});
 		}
-	}, [isTyping, dispatch]);
+	}, [editingFilter, isTyping, dispatch]);
 
 	useKeyBinding(KEYBINDINGS.BACK, goBack);
 
@@ -132,12 +207,29 @@ function SearchLayout() {
 	// Reset search state when leaving view
 	useEffect(() => {
 		return () => {
-			setResults([]);
+			setRawResults([]);
 			dispatch({category: 'SET_HAS_SEARCHED', hasSearched: false});
 			dispatch({category: 'SET_SEARCH_QUERY', query: ''});
 			lastAutoSearchedQueryRef.current = null;
 		};
 	}, [dispatch]);
+
+	useEffect(() => {
+		if (
+			filteredResults.length > 0 &&
+			navState.selectedResult >= filteredResults.length
+		) {
+			dispatch({category: 'SET_SELECTED_RESULT', index: 0});
+		}
+	}, [dispatch, filteredResults.length, navState.selectedResult]);
+
+	const artistFilterLabel = describeFilterValue(navState.searchFilters.artist);
+	const albumFilterLabel = describeFilterValue(navState.searchFilters.album);
+	const yearFilterLabel = describeFilterValue(navState.searchFilters.year);
+	const durationFilterLabel =
+		navState.searchFilters.duration && navState.searchFilters.duration !== 'all'
+			? navState.searchFilters.duration
+			: 'Any';
 
 	return (
 		<Box flexDirection="column">
@@ -165,11 +257,39 @@ function SearchLayout() {
 			</Text>
 
 			<SearchBar
-				isActive={isTyping && !isSearching}
+				isActive={!editingFilter && isTyping && !isSearching}
 				onInput={input => {
 					void performSearch(input);
 				}}
 			/>
+
+			{editingFilter ? (
+				<Box flexDirection="column" marginY={1}>
+					<Box>
+						<Text color={theme.colors.primary} bold>
+							Set {FILTER_LABELS[editingFilter]} filter:
+						</Text>
+						<TextInput
+							value={filterDraft}
+							onChange={setFilterDraft}
+							onSubmit={handleFilterSubmit}
+							placeholder="Type value and hit Enter"
+							focus
+						/>
+					</Box>
+					<Text color={theme.colors.dim}>
+						Press Enter to save (empty to clear) or Esc to cancel.
+					</Text>
+				</Box>
+			) : (
+				<Box marginY={1}>
+					<Text color={theme.colors.dim}>
+						Filters: Artist={artistFilterLabel}, Album={albumFilterLabel}, Year=
+						{yearFilterLabel}, Duration={durationFilterLabel} (Ctrl+A Artist,
+						Ctrl+L Album, Ctrl+Y Year, Ctrl+D Duration)
+					</Text>
+				</Box>
+			)}
 
 			{/* Loading */}
 			{(isLoading || isSearching) && (
@@ -182,7 +302,7 @@ function SearchLayout() {
 			{/* Results */}
 			{!isLoading && navState.hasSearched && (
 				<SearchResults
-					results={results}
+					results={filteredResults}
 					selectedIndex={navState.selectedResult}
 					isActive={!isTyping}
 					onMixCreated={handleMixCreated}
@@ -191,9 +311,10 @@ function SearchLayout() {
 			)}
 
 			{/* No Results */}
-			{!isLoading && navState.hasSearched && results.length === 0 && !error && (
-				<Text color={theme.colors.dim}>No results found</Text>
-			)}
+			{!isLoading &&
+				navState.hasSearched &&
+				filteredResults.length === 0 &&
+				!error && <Text color={theme.colors.dim}>No results found</Text>}
 
 			{/* Instructions */}
 			{actionMessage && (

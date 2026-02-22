@@ -1,5 +1,5 @@
 // Explicit action type definitions
-import type {Track} from './youtube-music.types.ts';
+import type {SearchFilters, Track} from './youtube-music.types.ts';
 
 export interface PlayAction {
 	readonly category: 'PLAY';
@@ -142,6 +142,15 @@ export interface SetSearchQueryAction {
 export interface SetSearchCategoryAction {
 	readonly category: 'SET_SEARCH_CATEGORY';
 	searchType: string;
+}
+
+export interface SetSearchFiltersAction {
+	readonly category: 'SET_SEARCH_FILTERS';
+	filters: Partial<SearchFilters>;
+}
+
+export interface ClearSearchFiltersAction {
+	readonly category: 'CLEAR_SEARCH_FILTERS';
 }
 
 export interface SetSelectedResultAction {

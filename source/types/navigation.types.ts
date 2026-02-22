@@ -4,6 +4,8 @@ import type {
 	GoBackAction,
 	SetSearchQueryAction,
 	SetSearchCategoryAction,
+	SetSearchFiltersAction,
+	ClearSearchFiltersAction,
 	SetSelectedResultAction,
 	SetSelectedPlaylistAction,
 	SetHasSearchedAction,
@@ -11,6 +13,7 @@ import type {
 	TogglePlayerModeAction,
 	DetachAction,
 } from './actions.ts';
+import type {SearchFilters} from './youtube-music.types.ts';
 
 export interface NavigationState {
 	currentView: string;
@@ -24,6 +27,7 @@ export interface NavigationState {
 	searchLimit: number;
 	history: string[];
 	playerMode: 'full' | 'mini';
+	searchFilters: SearchFilters;
 }
 
 export type NavigationAction =
@@ -31,6 +35,8 @@ export type NavigationAction =
 	| GoBackAction
 	| SetSearchQueryAction
 	| SetSearchCategoryAction
+	| SetSearchFiltersAction
+	| ClearSearchFiltersAction
 	| SetSelectedResultAction
 	| SetSelectedPlaylistAction
 	| SetHasSearchedAction

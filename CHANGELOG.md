@@ -1,3 +1,15 @@
+## [0.0.34](https://github.com/involvex/youtube-music-cli/compare/v0.0.33...v0.0.34) (2026-02-22)
+
+### Features
+
+- **search:** implement search filters by artist, album, and year ([d3edbe6](https://github.com/involvex/youtube-music-cli/commit/d3edbe6b61fd0afa363e1c19b420d73fd6ebbab7))
+
+## [0.0.33](https://github.com/involvex/youtube-music-cli/compare/v0.0.32...v0.0.33) (2026-02-22)
+
+### Features
+
+- add gapless playback, crossfade, and equalizer settings ([0fe10f4](https://github.com/involvex/youtube-music-cli/commit/0fe10f42700bb9031e4e4c1eacca1bc3aba5ec4d))
+
 ## [0.0.32](https://github.com/involvex/youtube-music-cli/compare/v0.0.31...v0.0.32) (2026-02-22)
 
 ## [0.0.31](https://github.com/involvex/youtube-music-cli/compare/v0.0.30...v0.0.31) (2026-02-22)

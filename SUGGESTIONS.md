@@ -6,9 +6,9 @@ This document tracks potential features, enhancements, and improvements for yout
 
 ### High Priority
 
-- [ ] **Gapless Playback** - Seamless transitions between tracks without audio gaps
-- [ ] **Crossfade Support** - Smooth audio crossfading between songs (configurable duration)
-- [ ] **Equalizer** - Built-in audio equalizer with preset profiles (Bass Boost, Vocal, etc.)
+- [x] **Gapless Playback** - Seamless transitions between tracks without audio gaps
+- [x] **Crossfade Support** - Smooth audio crossfading between songs (configurable duration)
+- [x] **Equalizer** - Built-in audio equalizer with preset profiles (Bass Boost, Vocal, etc.)
 
 ### Medium Priority
 
@@ -19,7 +19,7 @@ This document tracks potential features, enhancements, and improvements for yout
 
 ### High Priority
 
-- [ ] **Advanced Search Filters** - Filter by artist, album, year, duration
+- [x] **Advanced Search Filters** - Filter by artist, album, year, duration
 - [ ] **Smart Recommendations** - AI/ML-based track suggestions beyond YouTube's built-in algorithm
 
 ### Medium Priority
