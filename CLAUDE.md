@@ -104,3 +104,7 @@ Key types are in `source/types/`:
 - `youtube-music.types.ts`: Track, Album, Artist, Playlist
 - `theme.types.ts`: Theme interface
 - `cli.types.ts`: CLI flags and options
+
+## Roadmap & Priorities
+
+Consult `SUGGESTIONS.md` for the backlog and use `docs/roadmap.md` to see the in-progress work (crossfade/gapless playback, equalizer follow-ups, etc.). The README also links to this roadmap so every contributor or agent knows where to look before starting a new change.

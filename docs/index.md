@@ -97,6 +97,10 @@ ymc
     <h3>🏗️ Architecture</h3>
     <p>Technical overview</p>
   </a>
+  <a href="{{ '/roadmap' | relative_url }}" class="card">
+    <h3>🛣️ Roadmap</h3>
+    <p>See what the team is implementing next and how to contribute</p>
+  </a>
 </div>
 
 ## Requirements

@@ -142,3 +142,10 @@ Want to work on any of these? Check our [Contributing Guide](CONTRIBUTING.md) an
 - **High Priority**: Core functionality improvements, frequently requested
 - **Medium Priority**: Nice-to-have features, moderate complexity
 - **Low Priority**: Future considerations, complex implementations
+
+## 🛠 Implementation Plan
+
+- **[In progress] Crossfade & gapless playback**  
+  We are iterating on a crossfade-aware queue and mpv configuration that keeps playback seamless and gapless. See `docs/roadmap.md` for the technical steps, the settings that will surface the option, and the verification checkpoints.
+- **Next stops**  
+  After the core crossfade/gapless work stabilizes we will expand the story to cover the broader equalizer feature set and the smart recommendation items listed above. Each focus area should be tracked in `docs/roadmap.md` with matching README/CLAUDE callouts so the rest of the team can stay aligned.

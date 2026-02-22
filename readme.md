@@ -28,6 +28,10 @@ A powerful Terminal User Interface (TUI) music player for YouTube Music
 - 💾 **Downloads** - Save tracks/playlists/artists with `Shift+D`
 - 🏷️ **Metadata Tagging** - Auto-tag title/artist/album with optional cover art
 
+## Roadmap
+
+Visit [`SUGGESTIONS.md`](SUGGESTIONS.md) for the full backlog and use `docs/roadmap.md` to understand the current implementation focus (crossfade + gapless playback) and the next steps planned for equalizer/enhancements. The roadmap doc also explains how to pick up work so reviewers and contributors remain aligned.
+
 ## Prerequisites
 
 **Required:**
