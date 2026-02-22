@@ -1,8 +1,8 @@
 class YoutubeMusicCli < Formula
   desc "Terminal YouTube Music player"
   homepage "https://github.com/involvex/youtube-music-cli"
-  url "https://registry.npmjs.org/@involvex/youtube-music-cli/-/youtube-music-cli-0.0.37.tgz"
-  sha256 "ecb4908d00afc8e6046c075c3eb2875e6b41e053b9e57928e2fe4afd18e5f4db"
+  url "https://registry.npmjs.org/@involvex/youtube-music-cli/-/youtube-music-cli-0.0.38.tgz"
+  sha256 "846f85d4126bd401fe8c6591d146004aa8450f8648a2a125feb3382035edfe85"
   license "MIT"
 
   depends_on "node"
