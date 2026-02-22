@@ -1,3 +1,9 @@
+## [0.0.28](https://github.com/involvex/youtube-music-cli/compare/v0.0.27...v0.0.28) (2026-02-22)
+
+### Bug Fixes
+
+- standardize quote style in snyk_rules.instructions.md ([5906fed](https://github.com/involvex/youtube-music-cli/commit/5906fed587be5f9cd6629281428ef304d8b32749))
+
 ## [0.0.27](https://github.com/involvex/youtube-music-cli/compare/v0.0.26...v0.0.27) (2026-02-20)
 
 ## [0.0.26](https://github.com/involvex/youtube-music-cli/compare/v0.0.25...v0.0.26) (2026-02-20)
