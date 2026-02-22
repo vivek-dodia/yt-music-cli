@@ -3,6 +3,7 @@ import {Box, Text} from 'ink';
 import {usePlayer} from '../../hooks/usePlayer.ts';
 import {useTheme} from '../../hooks/useTheme.ts';
 import {formatTime} from '../../utils/format.ts';
+import {ICONS} from '../../utils/icons.ts';
 
 export default function MiniPlayerLayout() {
 	const {theme} = useTheme();
@@ -13,7 +14,7 @@ export default function MiniPlayerLayout() {
 	const title = track?.title ?? 'No track playing';
 	const progress = formatTime(state.progress);
 	const duration = formatTime(state.duration);
-	const playIcon = state.isPlaying ? '▶' : '⏸';
+	const playIcon = state.isPlaying ? ICONS.PLAY : ICONS.PAUSE;
 	const vol = `${state.volume}%`;
 	const speed =
 		(state.speed ?? 1.0) !== 1.0 ? ` ${(state.speed ?? 1.0).toFixed(2)}x` : '';

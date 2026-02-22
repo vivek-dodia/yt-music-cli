@@ -6,6 +6,7 @@ import {formatTime} from '../../utils/format.ts';
 import {useTerminalSize} from '../../hooks/useTerminalSize.ts';
 import {getSleepTimerService} from '../../services/sleep-timer/sleep-timer.service.ts';
 import {useState, useEffect} from 'react';
+import {ICONS} from '../../utils/icons.ts';
 
 export default function NowPlaying() {
 	const {theme} = useTheme();
@@ -93,9 +94,11 @@ export default function NowPlaying() {
 					<Text color={theme.colors.accent}> Loading...</Text>
 				)}
 				{!playerState.isPlaying && progress > 0 && (
-					<Text color={theme.colors.dim}> ⏸</Text>
+					<Text color={theme.colors.dim}> {ICONS.PAUSE}</Text>
 				)}
-				{playerState.shuffle && <Text color={theme.colors.primary}> 🔀</Text>}
+				{playerState.shuffle && (
+					<Text color={theme.colors.primary}> {ICONS.SHUFFLE}</Text>
+				)}
 				{sleepRemaining !== null && (
 					<Text color={theme.colors.warning}>
 						{' '}

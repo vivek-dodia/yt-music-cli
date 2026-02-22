@@ -11,6 +11,7 @@ import {useKeyBinding} from '../../hooks/useKeyboard.ts';
 import {KEYBINDINGS, VIEW} from '../../utils/constants.ts';
 import {Box, Text} from 'ink';
 import {usePlayer} from '../../hooks/usePlayer.ts';
+import {ICONS} from '../../utils/icons.ts';
 
 function SearchLayout() {
 	const {theme} = useTheme();
@@ -144,7 +145,7 @@ function SearchLayout() {
 			{playerState.currentTrack && (
 				<Box>
 					<Text color={theme.colors.dim}>
-						{playerState.isPlaying ? '▶ ' : '⏸ '}
+						{playerState.isPlaying ? `${ICONS.PLAY} ` : `${ICONS.PAUSE} `}
 					</Text>
 					<Text color={theme.colors.primary} bold>
 						{playerState.currentTrack.title}

@@ -6,6 +6,7 @@ import {useTheme} from '../../hooks/useTheme.ts';
 import {Box, Text} from 'ink';
 import {useEffect} from 'react';
 import {logger} from '../../services/logger/logger.service.ts';
+import {ICONS} from '../../utils/icons.ts';
 
 let mountCount = 0;
 
@@ -100,7 +101,7 @@ export default function PlayerControls() {
 				color={playerState.shuffle ? theme.colors.primary : theme.colors.dim}
 			>
 				[<Text color={theme.colors.dim}>Shift+S</Text>]{' '}
-				{playerState.shuffle ? '🔀 ON' : '🔀 OFF'}
+				{playerState.shuffle ? `${ICONS.SHUFFLE} ON` : `${ICONS.SHUFFLE} OFF`}
 			</Text>
 
 			{/* Speed indicator (only shown when not 1.0x) */}
