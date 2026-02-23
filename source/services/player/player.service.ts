@@ -294,6 +294,7 @@ class PlayerService {
 			case 'eof-reached':
 				event.eof = message.data as boolean;
 				if (event.eof) {
+					this.isPlaying = false;
 					logger.info('PlayerService', 'End of file reached');
 				}
 				break;

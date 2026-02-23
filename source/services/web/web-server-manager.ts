@@ -28,6 +28,7 @@ class WebServerManager {
 		shuffle: false,
 		isLoading: false,
 		error: null,
+		playRequestId: 0,
 	};
 
 	constructor() {

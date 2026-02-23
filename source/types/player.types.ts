@@ -43,6 +43,7 @@ export interface PlayerState {
 	shuffle: boolean;
 	isLoading: boolean;
 	error: string | null;
+	playRequestId: number;
 }
 
 export type PlayerAction =

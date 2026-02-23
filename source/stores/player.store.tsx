@@ -34,6 +34,7 @@ const initialState: PlayerState = {
 	shuffle: false,
 	isLoading: false,
 	error: null,
+	playRequestId: 0,
 };
 
 // Get player service instance
@@ -51,6 +52,7 @@ export function playerReducer(
 				isPlaying: true,
 				progress: 0,
 				error: null,
+				playRequestId: state.playRequestId + 1,
 			};
 
 		case 'PAUSE':
@@ -82,6 +84,7 @@ export function playerReducer(
 					currentTrack: state.queue[randomIndex] ?? null,
 					isPlaying: true,
 					progress: 0,
+					playRequestId: state.playRequestId + 1,
 				};
 			}
 
@@ -95,6 +98,7 @@ export function playerReducer(
 						currentTrack: state.queue[0] ?? null,
 						isPlaying: true,
 						progress: 0,
+						playRequestId: state.playRequestId + 1,
 					};
 				}
 				return state;
@@ -105,6 +109,7 @@ export function playerReducer(
 				currentTrack: state.queue[nextPosition] ?? null,
 				isPlaying: true,
 				progress: 0,
+				playRequestId: state.playRequestId + 1,
 			};
 		}
 
@@ -117,6 +122,7 @@ export function playerReducer(
 				return {
 					...state,
 					progress: 0,
+					playRequestId: state.playRequestId + 1,
 				};
 			}
 			return {
@@ -124,6 +130,7 @@ export function playerReducer(
 				queuePosition: prevPosition,
 				currentTrack: state.queue[prevPosition] ?? null,
 				progress: 0,
+				playRequestId: state.playRequestId + 1,
 			};
 
 		case 'SEEK':
@@ -210,6 +217,7 @@ export function playerReducer(
 					queuePosition: action.position,
 					currentTrack: state.queue[action.position] ?? null,
 					progress: 0,
+					playRequestId: state.playRequestId + 1,
 				};
 			}
 			return state;
@@ -253,6 +261,7 @@ export function playerReducer(
 				hasTrack: !!action.currentTrack,
 				queueLength: action.queue.length,
 			});
+			playerService.setVolume(action.volume);
 			return {
 				...state,
 				currentTrack: action.currentTrack,
@@ -379,6 +388,7 @@ function PlayerManager() {
 	}, [dispatch, playerService]);
 
 	// Handle track changes
+	const lastPlayedRequestId = useRef<number>(-1);
 	useEffect(() => {
 		const track = state.currentTrack;
 		if (!track) {
@@ -395,14 +405,19 @@ function PlayerManager() {
 			return;
 		}
 
-		// Guard: Only play if track actually changed
+		// Guard: Don't replay same track unless a new play request was explicitly dispatched
 		const currentTrackId = playerService.getCurrentTrackId?.() || '';
-		if (currentTrackId === track.videoId) {
+		const isSameTrack = currentTrackId === track.videoId;
+		const isNewPlayRequest =
+			state.playRequestId !== lastPlayedRequestId.current;
+		if (isSameTrack && !isNewPlayRequest) {
 			logger.debug('PlayerManager', 'Track already playing, skipping', {
 				videoId: track.videoId,
 			});
 			return;
 		}
+
+		lastPlayedRequestId.current = state.playRequestId;
 
 		logger.info('PlayerManager', 'Loading track', {
 			title: track.title,
@@ -536,7 +551,13 @@ function PlayerManager() {
 		void loadAndPlayTrack();
 		// Note: state.volume intentionally excluded - volume changes should not restart playback
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [state.currentTrack, state.isPlaying, dispatch, musicService]);
+	}, [
+		state.currentTrack,
+		state.isPlaying,
+		state.playRequestId,
+		dispatch,
+		musicService,
+	]);
 
 	// Handle progress tracking
 	useEffect(() => {
