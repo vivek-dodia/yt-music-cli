@@ -1,26 +1,18 @@
 {
 	"appName": "youtube-music-cli",
+	"displayName": "YouTube Music CLI",
 	"publisher": "CN=involvex",
 	"version": "0.0.39.0",
-	"description": "- A Commandline music player for youtube-music",
-	"executable": "./dist/youtube-music-cli.exe",
+	"description": "A command-line music player for YouTube Music",
+	"executable": "youtube-music-cli.exe",
+	"prebuiltExecutablePath": "./dist/youtube-music-cli.exe",
+	"alias": "ymc.exe",
 	"architecture": "x64",
 	"capabilities": ["internetClient", "runFullTrust"],
 	"skipBuild": true,
 	"installDevDeps": false,
-	"makeappxOnly": true,
-	"sign": true,
+	"sign": false,
 	"inputPath": ".",
 	"outputPath": "./dist",
-	"icon": "assets/icon.ico",
-	"certificateThumbprint": null,
-	"certificateSubject": null,
-	"certificatePath": null,
-	"certificatePassword": null,
-	"_generated": {
-		"version": "1.4.1",
-		"timestamp": "2026-02-23T15:57:22.628Z",
-		"node": "v25.2.1",
-		"platform": "win32"
-	}
+	"icon": "assets/icon.ico"
 }

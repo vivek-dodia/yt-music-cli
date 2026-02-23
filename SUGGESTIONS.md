@@ -106,7 +106,7 @@ This document tracks potential features, enhancements, and improvements for yout
 - [x] **Homebrew Formula** - Easy installation on macOS via `brew install`
 - [ ] **AUR Package** - Arch Linux package for `yay`/`paru` users
 - [ ] **Snap/Flatpak** - Linux universal packages for broader distro support
-- [ ] **Windows Installer** - MSI/EXE installer for Windows users
+- [x] **Windows MSIX Package** - MSIX installer for Windows users via `bun run msix` (requires self-signed cert for dev installs; see `msix-config.json`)
 - [ ] **NixOS / Nix Flake** - Reproducible Nix package for NixOS and `nix profile install`
 
 ### Low Priority

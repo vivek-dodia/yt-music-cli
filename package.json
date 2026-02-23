@@ -55,7 +55,7 @@
 		"build:web": "cd web && bun run build",
 		"dev:web": "cd web && bun run dev",
 		"build:all": "bun run build && bun run build:web",
-		"msix": "msix-packager-cli  package --config ./msix-config.json --skip-build"
+		"msix": "bun run compile && msix-packager-cli package --config ./msix-config.json --skip-build"
 	},
 	"prettier": "@vdemedes/prettier-config",
 	"ava": {
