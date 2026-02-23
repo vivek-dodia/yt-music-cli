@@ -1,3 +1,9 @@
+## [0.0.39](https://github.com/involvex/youtube-music-cli/compare/v0.0.38...v0.0.39) (2026-02-23)
+
+### Features
+
+- add visual flash feedback when shortcuts are pressed ([dc3efa8](https://github.com/involvex/youtube-music-cli/commit/dc3efa8f642619ad2e9ce937528e76f4d388e4dc))
+
 ## [0.0.38](https://github.com/involvex/youtube-music-cli/compare/v0.0.36...v0.0.38) (2026-02-22)
 
 ### Bug Fixes
