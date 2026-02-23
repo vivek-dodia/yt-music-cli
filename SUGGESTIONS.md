@@ -28,7 +28,7 @@ This document tracks potential features, enhancements, and improvements for yout
 - [ ] **New Releases** - Dedicated view for newly released music
 - [ ] **Similar Artists** - Discover artists similar to the currently playing one
 - [ ] **Mood-Based Radio** - Start a radio station seeded by a mood or energy level selection
-- [ ] **Recently Played** - Dedicated view showing full listening history with timestamps
+- [x] **Recently Played** - Dedicated view showing full listening history with timestamps
 - [ ] **AI Playlist Generation** - Generate a playlist from a natural-language prompt (e.g. "relaxing morning jazz")
 
 ## 📋 Playlist Management
@@ -69,7 +69,7 @@ This document tracks potential features, enhancements, and improvements for yout
 ### High Priority
 
 - [ ] **Multiple Audio Backends** - Support VLC and ffplay as alternatives to mpv
-- [ ] **Shell Completions** - Tab-completion scripts for Bash, Zsh, and Fish
+- [ ] **Shell Completions** - Tab-completion scripts for Bash, Zsh, Powershell and Fish
 - [ ] **Custom mpv Config Passthrough** - Allow extra mpv flags to be specified in config or via CLI
 
 ### Medium Priority
@@ -145,7 +145,7 @@ Want to work on any of these? Check our [Contributing Guide](CONTRIBUTING.md) an
 
 ## 🛠 Implementation Plan
 
-- **[In progress] Crossfade & gapless playback**  
+- **[In progress] Crossfade & gapless playback**
   We are iterating on a crossfade-aware queue and mpv configuration that keeps playback seamless and gapless. See `docs/roadmap.md` for the technical steps, the settings that will surface the option, and the verification checkpoints.
-- **Next stops**  
+- **Next stops**
   After the core crossfade/gapless work stabilizes we will expand the story to cover the broader equalizer feature set and the smart recommendation items listed above. Each focus area should be tracked in `docs/roadmap.md` with matching README/CLAUDE callouts so the rest of the team can stay aligned.
