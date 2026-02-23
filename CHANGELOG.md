@@ -1,3 +1,9 @@
+## [0.0.44](https://github.com/involvex/youtube-music-cli/compare/v0.0.43...v0.0.44) (2026-02-23)
+
+### Features
+
+- add standalone executable support with build-time versioning ([18f730c](https://github.com/involvex/youtube-music-cli/commit/18f730cef46dfe862cfbce0065af4b4989296ef0))
+
 ## [0.0.43](https://github.com/involvex/youtube-music-cli/compare/v0.0.42...v0.0.43) (2026-02-23)
 
 ## [0.0.42](https://github.com/involvex/youtube-music-cli/compare/v0.0.41...v0.0.42) (2026-02-23)
