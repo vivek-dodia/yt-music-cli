@@ -18,6 +18,17 @@ $newVersionOutput = bun pm version patch
 $NEW_VERSION = ($newVersionOutput | Select-Object -Last 1).Trim() # Assumes the last line is the version, e.g., "v1.0.1"
 Write-Host "Version bumped to $NEW_VERSION"
 
+# 2a. Update msix-config.json version to match (Windows 4-part format X.Y.Z.0)
+Write-Host "Updating msix-config.json version..."
+$semver = $NEW_VERSION.TrimStart('v')
+$msixVersion = "$semver.0"
+$msixConfig = Get-Content -Raw msix-config.json | ConvertFrom-Json
+$msixConfig.version = $msixVersion
+$msixJson = $msixConfig | ConvertTo-Json -Depth 10
+# Preserve trailing newline and consistent formatting
+[System.IO.File]::WriteAllText((Resolve-Path msix-config.json), ($msixJson + "`n"))
+Write-Host "msix-config.json updated to $msixVersion"
+
 # 3. Generate CHANGELOG.md
 Write-Host "Generating CHANGELOG.md..."
 bun run changelog

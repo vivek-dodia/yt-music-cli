@@ -69,7 +69,7 @@ This document tracks potential features, enhancements, and improvements for yout
 ### High Priority
 
 - [ ] **Multiple Audio Backends** - Support VLC and ffplay as alternatives to mpv
-- [ ] **Shell Completions** - Tab-completion scripts for Bash, Zsh, Powershell and Fish
+- [x] **Shell Completions** - Tab-completion scripts for Bash, Zsh, Powershell and Fish
 - [ ] **Custom mpv Config Passthrough** - Allow extra mpv flags to be specified in config or via CLI
 
 ### Medium Priority

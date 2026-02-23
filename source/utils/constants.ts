@@ -1,6 +1,34 @@
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {dirname, resolve} from 'node:path';
+
+function loadAppVersion(): string {
+	let dir = dirname(fileURLToPath(import.meta.url));
+	for (let i = 0; i < 5; i++) {
+		try {
+			const content = readFileSync(resolve(dir, 'package.json'), 'utf8');
+			const pkg = JSON.parse(content) as {version?: string; name?: string};
+			if (
+				typeof pkg.version === 'string' &&
+				pkg.name?.includes('youtube-music-cli')
+			) {
+				return pkg.version;
+			}
+		} catch {
+			/* ignore */
+		}
+
+		const parent = dirname(dir);
+		if (parent === dir) break;
+		dir = parent;
+	}
+
+	return '0.0.0';
+}
+
 // Application constants
 export const APP_NAME = '@involvex/youtube-music-cli';
-export const APP_VERSION = '0.0.20';
+export const APP_VERSION = loadAppVersion();
 
 // Config directory
 export const CONFIG_DIR =

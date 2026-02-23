@@ -10,6 +10,10 @@ import {getImportService} from './services/import/import.service.ts';
 import {getWebServerManager} from './services/web/web-server-manager.ts';
 import {getWebStreamingService} from './services/web/web-streaming.service.ts';
 import {getVersionCheckService} from './services/version-check/version-check.service.ts';
+import {
+	generateCompletion,
+	type ShellType,
+} from './services/completions/completions.service.ts';
 import {getConfigService} from './services/config/config.service.ts';
 import {getPlayerService} from './services/player/player.service.ts';
 import {APP_VERSION} from './utils/constants.ts';
@@ -19,6 +23,8 @@ import type {Track} from './types/youtube-music.types.ts';
 
 const cli = meow(
 	`
+	youtube-music-cli@${APP_VERSION}
+
 	Usage
 	  $ youtube-music-cli
 	  $ youtube-music-cli play <track-id|youtube-url>
@@ -56,6 +62,12 @@ const cli = meow(
 	  --name               Custom name for imported playlist
 	  --help, -h           Show this help
 
+	Shell Completions
+	  $ youtube-music-cli completions bash
+	  $ youtube-music-cli completions zsh
+	  $ youtube-music-cli completions powershell
+	  $ youtube-music-cli completions fish
+
 	Examples
 	  $ youtube-music-cli
 	  $ youtube-music-cli play dQw4w9WgXcQ
@@ -64,6 +76,7 @@ const cli = meow(
 	  $ youtube-music-cli plugins install adblock
 	  $ youtube-music-cli import spotify "https://open.spotify.com/playlist/..."
 	  $ youtube-music-cli --web --web-port 3000
+	  $ youtube-music-cli completions powershell | Out-File $PROFILE
 `,
 	{
 		importMeta: import.meta,
@@ -352,7 +365,19 @@ if (command === 'plugins') {
 } else {
 	// Handle other direct commands
 
-	if (command === 'play' && args[0]) {
+	if (command === 'completions') {
+		const shell = args[0] as ShellType | undefined;
+		const validShells: ShellType[] = ['bash', 'zsh', 'powershell', 'fish'];
+		if (!shell || !validShells.includes(shell)) {
+			console.error(
+				'Usage: youtube-music-cli completions <bash|zsh|powershell|fish>',
+			);
+			process.exit(1);
+		}
+
+		console.log(generateCompletion(shell));
+		process.exit(0);
+	} else if (command === 'play' && args[0]) {
 		// Play specific track
 		(cli.flags as Flags).playTrack = args[0];
 	} else if (command === 'search' && args[0]) {
