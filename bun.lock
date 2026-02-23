@@ -6,7 +6,6 @@
       "name": "youtube-music-cli",
       "dependencies": {
         "@distube/ytdl-core": "^4.16.12",
-        "@involvex/msix-packager-cli": "link:@involvex/msix-packager-cli",
         "ansi-escapes": "^7.3.0",
         "discord-rpc": "^4.0.1",
         "ink": "^6.8.0",
@@ -121,8 +120,6 @@
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.3", "", {}, "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="],
 
     "@hutson/parse-repository-url": ["@hutson/parse-repository-url@5.0.0", "", {}, "sha512-e5+YUKENATs1JgYHMzTr2MW/NDcXGfYFAuOQU8gJgF/kEh4EqKgfGrfLI67bMD4tbhZVlkigz/9YYwWcbOFthg=="],
-
-    "@involvex/msix-packager-cli": ["@involvex/msix-packager-cli@link:@involvex/msix-packager-cli", { "bin": { "msix-packager-cli": "src/cli.js" } }],
 
     "@isaacs/cliui": ["@isaacs/cliui@8.0.2", "", { "dependencies": { "string-width": "^5.1.2", "string-width-cjs": "npm:string-width@^4.2.0", "strip-ansi": "^7.0.1", "strip-ansi-cjs": "npm:strip-ansi@^6.0.1", "wrap-ansi": "^8.1.0", "wrap-ansi-cjs": "npm:wrap-ansi@^7.0.0" } }, "sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA=="],
 

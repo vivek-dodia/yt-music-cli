@@ -78,8 +78,7 @@
 		"react": "^19.2.4",
 		"ws": "^8.19.0",
 		"youtube-ext": "^1.1.25",
-		"youtubei.js": "^16.0.1",
-		"@involvex/msix-packager-cli": "link:@involvex/msix-packager-cli"
+		"youtubei.js": "^16.0.1"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
