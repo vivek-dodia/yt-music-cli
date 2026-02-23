@@ -61,7 +61,7 @@ const buildOptions = {
 	footer: banner,
 	minify: true,
 	sourcemap: 'linked',
-	bytecode: true,
+	bytecode: false,
 	define: {
 		'process.env.NODE_ENV': JSON.stringify('production'),
 		VERSION: JSON.stringify(pkg.version ?? '0.0.0'),

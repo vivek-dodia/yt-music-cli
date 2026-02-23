@@ -2,7 +2,12 @@ import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {dirname, resolve} from 'node:path';
 
+declare const VERSION: string | undefined;
+
 function loadAppVersion(): string {
+	if (typeof VERSION !== 'undefined') {
+		return VERSION;
+	}
 	let dir = dirname(fileURLToPath(import.meta.url));
 	for (let i = 0; i < 5; i++) {
 		try {

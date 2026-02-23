@@ -21,6 +21,12 @@ import {ensurePlaybackDependencies} from './services/player/dependency-check.ser
 import {getMusicService} from './services/youtube-music/api.ts';
 import type {Track} from './types/youtube-music.types.ts';
 
+const isStandalone =
+	(process as unknown as {isStandaloneExecutable?: boolean})
+		.isStandaloneExecutable ||
+	(globalThis as unknown as {Bun?: {isStandalone: boolean}}).Bun?.isStandalone;
+const argv = isStandalone ? process.argv.slice(1) : process.argv.slice(2);
+
 const cli = meow(
 	`
 	youtube-music-cli@${APP_VERSION}
@@ -80,6 +86,7 @@ const cli = meow(
 `,
 	{
 		importMeta: import.meta,
+		argv,
 		flags: {
 			theme: {
 				type: 'string',
