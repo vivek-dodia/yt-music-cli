@@ -331,6 +331,7 @@ function PlayerManager() {
 
 	// Register event handler for mpv IPC events
 	const eofTimestampRef = useRef(0);
+	const lastAutoNextRef = useRef(0);
 	useEffect(() => {
 		let lastProgressUpdate = 0;
 		const PROGRESS_THROTTLE_MS = 1000; // Update progress max once per second
@@ -352,8 +353,10 @@ function PlayerManager() {
 			if (event.eof) {
 				// Track ended — record timestamp so we can suppress mpv's spurious
 				// pause event that immediately follows EOF (idle state).
-				eofTimestampRef.current = Date.now();
+				const now = Date.now();
+				eofTimestampRef.current = now;
 				next();
+				lastAutoNextRef.current = now;
 			}
 
 			if (event.paused !== undefined) {
@@ -630,14 +633,52 @@ function PlayerManager() {
 	}, [state.volume]);
 
 	// Handle track completion
+	const autoAdvanceRef = useRef(false);
 	useEffect(() => {
-		if (state.duration > 0 && state.progress >= state.duration) {
-			if (state.repeat === 'one') {
-				dispatch({category: 'SEEK', position: 0});
-			}
-			// next() for regular track completion is handled by the eof IPC event
+		if (state.duration <= 0) {
+			autoAdvanceRef.current = false;
+			return;
 		}
-	}, [state.progress, state.duration, state.repeat, dispatch]);
+
+		if (state.progress < state.duration) {
+			autoAdvanceRef.current = false;
+			return;
+		}
+
+		if (state.repeat === 'one') {
+			dispatch({category: 'SEEK', position: 0});
+			return;
+		}
+
+		const hasNextTrack =
+			state.queue.length > 0 &&
+			(state.repeat === 'all' ||
+				state.queuePosition < state.queue.length - 1 ||
+				(state.shuffle && state.queue.length > 1));
+
+		if (!hasNextTrack) {
+			return;
+		}
+
+		const now = Date.now();
+		if (now - lastAutoNextRef.current < 1500) {
+			return;
+		}
+
+		if (!autoAdvanceRef.current) {
+			autoAdvanceRef.current = true;
+			lastAutoNextRef.current = now;
+			dispatch({category: 'NEXT'});
+		}
+	}, [
+		state.duration,
+		state.progress,
+		state.repeat,
+		state.queue.length,
+		state.queuePosition,
+		state.shuffle,
+		dispatch,
+	]);
 
 	return null;
 }

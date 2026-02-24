@@ -27,6 +27,7 @@ A powerful Terminal User Interface (TUI) music player for YouTube Music
 - 🖥️ **Headless Mode** - Run without TUI for scripting
 - 💾 **Downloads** - Save tracks/playlists/artists with `Shift+D`
 - 🏷️ **Metadata Tagging** - Auto-tag title/artist/album with optional cover art
+- ⚡️ **Shell Completions** - `ymc completions <bash|zsh|powershell|fish>` emits scripts you can source or save so the CLI (also available as `ymc`) tab-completes subcommands and flags
 
 ## Roadmap
 
@@ -160,6 +161,28 @@ youtube-music-cli resume
 youtube-music-cli skip
 youtube-music-cli back
 ```
+
+### Shell completions
+
+Generate shell completion helpers through the lightweight `ymc` alias that ships with the CLI. Run `ymc completions <bash|zsh|powershell|fish>` to print the completion script for your shell, then source it or persist it in your profile:
+
+```bash
+# Bash
+source <(ymc completions bash)
+ymc completions bash >> ~/.bash_completion
+
+# Zsh
+source <(ymc completions zsh)
+
+# PowerShell
+ymc completions powershell | Out-File -Encoding utf8 $PROFILE
+Invoke-Expression (ymc completions powershell)
+
+# Fish
+ymc completions fish > ~/.config/fish/completions/ymc.fish
+```
+
+If you installed the CLI globally with an alias or script name, make sure `ymc` points at the same binary before generating completions so that the script matches your install path.
 
 ### Options
 

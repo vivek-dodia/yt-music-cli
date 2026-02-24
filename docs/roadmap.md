@@ -29,6 +29,10 @@ This document captures how the team is turning the ideas listed in `SUGGESTIONS.
 - **Volume fade in/out** – add optional fade logic when a track starts or ends to soften transitions; evaluate whether this belongs inside `player.service` or as part of `playerReducer`.
 - **Discovery & smart recommendations** – extend the suggestions view by surfacing AI-powered or similarity-based results once the playback layer is stable.
 
+## Recent additions
+
+- **Shell completions for `ymc`** – the CLI now ships with `ymc completions <bash|zsh|powershell|fish>` to emit shell-specific helper scripts. This keeps the tab completion logic centralized in the CLI and lets contributors install/automate the helpers by sourcing the output or writing it into their profile. Documenting this command in the README and guidance docs ensures every platform can pick it up immediately.
+
 Whenever a new priority becomes actionable, give it a subsection here describing the technical owner, the files that will change, and any follow-up documentation that needs to be touched.
 
 ## How to contribute
