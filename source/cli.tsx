@@ -483,7 +483,7 @@ if (command === 'plugins') {
 				process.exit(1);
 			}
 		})();
-	} else if (cli.flags.web || cli.flags.webOnly) {
+	} else if (cli.flags.web || cli.flags['webOnly']) {
 		// Handle web server flags
 		void (async () => {
 			const webManager = getWebServerManager();
@@ -501,10 +501,10 @@ if (command === 'plugins') {
 
 				await webManager.start({
 					enabled: true,
-					host: cli.flags.webHost ?? 'localhost',
-					port: cli.flags.webPort ?? 8080,
-					webOnly: cli.flags.webOnly,
-					auth: cli.flags.webAuth,
+					host: cli.flags['webHost'] ?? 'localhost',
+					port: cli.flags['webPort'] ?? 8080,
+					webOnly: cli.flags['webOnly'],
+					auth: cli.flags['webAuth'],
 				});
 
 				const serverUrl = webManager.getServerUrl();
@@ -518,7 +518,7 @@ if (command === 'plugins') {
 				});
 
 				// If web-only mode, just keep the server running
-				if (cli.flags.webOnly) {
+				if (cli.flags['webOnly']) {
 					console.log('Running in web-only mode. Press Ctrl+C to exit.');
 					// Keep process alive
 					process.on('SIGINT', () => {
@@ -549,7 +549,7 @@ if (command === 'plugins') {
 			}
 
 			// Check for updates before rendering the app (skip in web-only mode)
-			if (!cli.flags.webOnly) {
+			if (!cli.flags['webOnly']) {
 				const versionCheck = getVersionCheckService();
 				const config = getConfigService();
 				const lastCheck = config.getLastVersionCheck();

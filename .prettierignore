@@ -1,3 +1,10 @@
 dist
 docs/_layouts
 docs/assets
+node_modules
+.claude
+.gemini
+.agent
+.agents
+.mcp
+.mira

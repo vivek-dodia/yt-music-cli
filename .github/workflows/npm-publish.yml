@@ -33,3 +33,4 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           files: dist/youtube-music-cli.exe
+          body: ${{ github.workspace }}/CHANGELOG.md

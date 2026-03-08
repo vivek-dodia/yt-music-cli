@@ -2,8 +2,10 @@
 	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
 		"outDir": "dist",
+		"module": "esnext",
+		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
-		"rewriteRelativeImportExtensions": true,
+		"emitDeclarationOnly": true,
 		"jsx": "react-jsx",
 		"types": ["node"]
 	},
