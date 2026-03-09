@@ -729,15 +729,23 @@ function PlayerManager() {
 					basedOn: trackTitle,
 				});
 
-				// If the player is waiting for an autoplay track because the queue ended, trigger NEXT now that tracks are added
-				if (
-					state.queuePosition >= state.queue.length - 1 &&
-					state.progress >= state.duration - 2 &&
-					!state.isPlaying
-				) {
+				// Check if we need to advance immediately (if we were stuck at the end)
+				// We check if the queue position was at the end of the *previous* queue length
+				// (current queue length - new suggestions length - 1)
+				const wasAtEndOfQueue =
+					state.queuePosition >= state.queue.length - 1;
+
+				// Relaxed check: if we are near the end of the track (within 5s), trigger NEXT.
+				// We do NOT check !state.isPlaying because mpv might be in a weird state
+				// (idle but suppressed pause) if the track actually finished.
+				if (wasAtEndOfQueue && state.progress >= state.duration - 5) {
 					logger.info(
 						'PlayerManager',
 						'Autoplay: resuming playback via freshly added suggestions',
+						{
+							progress: state.progress,
+							duration: state.duration,
+						},
 					);
 					dispatch({category: 'NEXT'});
 				}
