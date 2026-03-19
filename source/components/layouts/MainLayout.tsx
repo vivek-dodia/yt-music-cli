@@ -21,6 +21,7 @@ import KeybindingsLayout from '../config/KeybindingsLayout.tsx';
 import TrendingLayout from './TrendingLayout.tsx';
 import ExploreLayout from './ExploreLayout.tsx';
 import HistoryLayout from './HistoryLayout.tsx';
+import HomeLayout from './HomeLayout.tsx';
 import ImportLayout from '../import/ImportLayout.tsx';
 import ExportLayout from '../export/ExportLayout.tsx';
 import NewReleasesLayout from './NewReleasesLayout.tsx';
@@ -64,6 +65,10 @@ function MainLayout() {
 
 	const goToHistory = useCallback(() => {
 		dispatch({category: 'NAVIGATE', view: VIEW.HISTORY});
+	}, [dispatch]);
+
+	const goToHome = useCallback(() => {
+		dispatch({category: 'NAVIGATE', view: VIEW.HOME});
 	}, [dispatch]);
 
 	const goToHelp = useCallback(() => {
@@ -165,6 +170,7 @@ function MainLayout() {
 	useKeyBinding(KEYBINDINGS.PLUGINS, goToPlugins);
 	useKeyBinding(KEYBINDINGS.SUGGESTIONS, goToSuggestions);
 	useKeyBinding(KEYBINDINGS.HISTORY, goToHistory);
+	useKeyBinding(KEYBINDINGS.HOME, goToHome);
 	useKeyBinding(KEYBINDINGS.SETTINGS, goToSettings);
 	useKeyBinding(KEYBINDINGS.HELP, goToHelp);
 	useKeyBinding(['M'], togglePlayerMode);
@@ -188,6 +194,9 @@ function MainLayout() {
 		switch (navState.currentView) {
 			case 'player':
 				return <PlayerLayout key="player" />;
+
+			case 'home':
+				return <HomeLayout key="home" />;
 
 			case 'search':
 				return <SearchLayout key="search" />;

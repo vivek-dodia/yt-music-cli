@@ -25,11 +25,12 @@ youtube-music-cli/
 │   ├── app.tsx              # App setup
 │   ├── main.tsx             # Root component with providers
 │   │
-│   ├── components/          # UI Components
-│   │   ├── layouts/         # Main view layouts
-│   │   ├── player/          # Player components
-│   │   ├── search/          # Search components
-│   │   ├── plugins/         # Plugin management UI
+├── components/          # UI Components
+│   ├── layouts/         # Main view layouts
+│   ├── player/          # Player components
+│   ├── favorites/       # Favorites view
+│   ├── search/          # Search components
+│   ├── plugins/         # Plugin management UI
 │   │   ├── settings/        # Settings UI
 │   │   └── common/          # Shared components
 │   │
@@ -71,6 +72,9 @@ Uses React Context + useReducer pattern:
                     │ │PlayerProvider│ │
                     │ └─────────────┘ │
                     │ ┌─────────────┐ │
+                    │ │FavProvider  │ │
+                    │ └─────────────┘ │
+                    │ ┌─────────────┐ │
                     │ │NavProvider  │ │
                     │ └─────────────┘ │
                     │ ┌─────────────┐ │
@@ -93,6 +97,14 @@ Manages playback state:
 - Queue
 - Playback status
 - Volume, shuffle, repeat
+
+### Favorites Store
+
+Manages favorite tracks:
+
+- Toggle favorite status
+- Persistence to `favorites.json`
+- Optimized list rendering
 
 ### Navigation Store
 
@@ -133,6 +145,16 @@ Wraps YouTube Music API (Innertube).
 const music = getMusicService();
 const results = await music.search('query');
 const suggestions = await music.getSuggestions(videoId);
+```
+
+### FavoritesService
+
+Wraps favorites persistence.
+
+```typescript
+const favs = getFavoritesService();
+await favs.saveFavorites(tracks);
+const data = await favs.loadFavorites();
 ```
 
 ### PluginRegistryService

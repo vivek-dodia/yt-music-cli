@@ -13,6 +13,9 @@ This document tracks potential features, enhancements, and improvements for yout
 ### Medium Priority
 
 - Implemented **Volume Fade In/Out** - Gradually fade volume at track start and end for smooth transitions
+- Implemented **Mini Player Mode** - Compact single-line player for use alongside other terminal work
+- Implemented **Recently Played** - Dedicated view showing full listening history with timestamps
+- Implemented **Startup Screen** - Welcome screen showing recently played and favorite content
 - Implemented **A/B Loop** - Mark two points in a track and loop between them (practice/review mode)
 
 ## 🔍 Discovery & Search
@@ -28,13 +31,13 @@ This document tracks potential features, enhancements, and improvements for yout
 - Planned **New Releases** - Dedicated view for newly released music
 - Planned **Similar Artists** - Discover artists similar to the currently playing one
 - Planned **Mood-Based Radio** - Start a radio station seeded by a mood or energy level selection
-- Implemented **Recently Played** - Dedicated view showing full listening history with timestamps
 - Planned **AI Playlist Generation** - Generate a playlist from a natural-language prompt (e.g. "relaxing morning jazz")
 
 ## 📋 Playlist Management
 
 ### High Priority
 
+- Implemented **Favorites** - Persistence for favorite tracks, toggle with `f`, view with `Shift+F`
 - Planned **Playlist Sync** - Two-way sync with YouTube Music account playlists
 - Planned **Smart Playlists** - Auto-generated playlists based on listening history and habits
 
@@ -62,7 +65,6 @@ This document tracks potential features, enhancements, and improvements for yout
 - Planned **More Themes** - Additional color schemes: Dracula, Nord, Solarized, Catppuccin
 - Planned **Waveform Progress Bar** - Replace the plain progress bar with an ASCII waveform representation
 - Planned **Configurable Layout** - User-adjustable panel sizes and component arrangement
-- Planned **Startup Screen** - Welcome screen showing recently played and favorite content
 
 ## 🔧 Technical Improvements
 

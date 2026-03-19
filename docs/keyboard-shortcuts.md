@@ -11,15 +11,16 @@ Complete reference of all keyboard shortcuts in youtube-music-cli.
 
 These work from any screen.
 
-| Key   | Action               |
-| ----- | -------------------- |
-| `?`   | Show help screen     |
-| `/`   | Open search          |
-| `p`   | Open plugins manager |
-| `g`   | Show suggestions     |
-| `,`   | Open settings        |
-| `q`   | Quit application     |
-| `Esc` | Go back / Close menu |
+| Key       | Action               |
+| --------- | -------------------- |
+| `?`       | Show help screen     |
+| `/`       | Open search          |
+| `p`       | Open plugins manager |
+| `Shift+F` | Open favorites view  |
+| `g`       | Show suggestions     |
+| `,`       | Open settings        |
+| `q`       | Quit application     |
+| `Esc`     | Go back / Close menu |
 
 ## Playback Controls
 
@@ -34,6 +35,7 @@ These work from any screen.
 | `Shift+←`         | Seek backward 10 seconds            |
 | `=`               | Volume up (+5%)                     |
 | `-`               | Volume down (-5%)                   |
+| `f`               | Toggle favorite                     |
 | `s`               | Toggle shuffle                      |
 | `r`               | Cycle repeat mode (off → all → one) |
 

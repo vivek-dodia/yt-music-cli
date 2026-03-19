@@ -157,6 +157,7 @@ Output format for downloads.
 ```
 ~/.youtube-music-cli/
 ├── config.json           # Main configuration
+├── favorites.json        # Favorite tracks collection
 ├── downloads/            # Default download folder
 ├── plugins/              # Installed plugins
 │   ├── adblock/

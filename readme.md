@@ -18,6 +18,7 @@ A powerful Terminal User Interface (TUI) music player for YouTube Music
 - 🎨 **Beautiful TUI** - Rich terminal interface built with React and Ink
 - 🔍 **Search** - Find songs, albums, artists, and playlists
 - 📋 **Queue Management** - Build and manage your playback queue
+- ❤️ **Favorites** - Mark tracks as favorites with `f` and view them with `Shift+F`
 - 🔀 **Shuffle & Repeat** - Multiple playback modes
 - 🎚️ **Volume Control** - Fine-grained volume adjustment
 - 💡 **Smart Suggestions** - Discover related tracks
@@ -212,15 +213,16 @@ youtube-music-cli play dQw4w9WgXcQ --shuffle
 
 ### Global
 
-| Key   | Action          |
-| ----- | --------------- |
-| `?`   | Show help       |
-| `/`   | Search          |
-| `p`   | Plugins manager |
-| `g`   | Suggestions     |
-| `,`   | Settings        |
-| `Esc` | Go back         |
-| `q`   | Quit            |
+| Key       | Action          |
+| --------- | --------------- |
+| `?`       | Show help       |
+| `/`       | Search          |
+| `p`       | Plugins manager |
+| `Shift+F` | Favorites view  |
+| `g`       | Suggestions     |
+| `,`       | Settings        |
+| `Esc`     | Go back         |
+| `q`       | Quit            |
 
 ### Playback
 
@@ -233,6 +235,7 @@ youtube-music-cli play dQw4w9WgXcQ --shuffle
 | `Shift+←` | Seek backward 10s |
 | `=`       | Volume up         |
 | `-`       | Volume down       |
+| `f`       | Toggle favorite   |
 | `s`       | Toggle shuffle    |
 | `r`       | Cycle repeat mode |
 

@@ -31,6 +31,7 @@ This document captures how the team is turning the ideas listed in `SUGGESTIONS.
 
 ## Recent additions
 
+- **Favorites feature** – Users can now mark tracks as favorites using the `f` key and view their collection with `Shift+F`. Favorites are persisted in `~/.youtube-music-cli/favorites.json` and indicated with a heart icon (♥) across all views.
 - **Shell completions for `ymc`** – the CLI now ships with `ymc completions <bash|zsh|powershell|fish>` to emit shell-specific helper scripts. This keeps the tab completion logic centralized in the CLI and lets contributors install/automate the helpers by sourcing the output or writing it into their profile. Documenting this command in the README and guidance docs ensures every platform can pick it up immediately.
 
 Whenever a new priority becomes actionable, give it a subsection here describing the technical owner, the files that will change, and any follow-up documentation that needs to be touched.

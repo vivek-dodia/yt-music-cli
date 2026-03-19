@@ -37,6 +37,13 @@ title: Home
     </div>
   </div>
   <div class="feature">
+    <span class="feature-icon">❤️</span>
+    <div>
+      <h3>Favorites</h3>
+      <p>Mark tracks with <code>f</code> and access your collection with <code>Shift+F</code></p>
+    </div>
+  </div>
+  <div class="feature">
     <span class="feature-icon">🔀</span>
     <div>
       <h3>Shuffle & Repeat</h3>

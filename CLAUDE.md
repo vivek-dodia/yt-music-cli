@@ -47,6 +47,7 @@ The `prebuild` script automatically runs `format` → `lint:fix` → `typecheck`
 The codebase uses a custom store pattern built on React Context + useReducer:
 
 - **`source/stores/player.store.tsx`**: Core player state (playback, queue, volume, shuffle/repeat). Exports `PlayerProvider` and `usePlayer()` hook. State transitions happen through action categories (PLAY, PAUSE, NEXT, SEEK, etc.)
+- **`source/stores/favorites.store.tsx`**: Favorite tracks state management.
 - **`source/stores/navigation.store.tsx`**: View navigation state
 - **`source/contexts/theme.context.tsx`**: Theme management, exports `ThemeProvider` and `useTheme()` hook
 
@@ -66,6 +67,7 @@ Services in `source/services/` provide abstraction over external dependencies:
 source/components/
 ├── layouts/       # Main layout containers (PlayerLayout, SearchLayout, etc.)
 ├── player/        # Player-specific components (PlayerControls, QueueList, etc.)
+├── favorites/     # Favorites list and view components
 ├── search/        # Search components (SearchBar, SearchResults)
 ├── playlist/      # Playlist management components
 ├── theme/         # Theme switching components

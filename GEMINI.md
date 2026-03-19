@@ -35,6 +35,7 @@
 The project uses a predictable state management pattern:
 
 - **`PlayerProvider`**: Manages playback state, queue, volume, and shuffle/repeat modes.
+- **`FavoritesProvider`**: Manages favorite tracks and their persistence.
 - **`NavigationProvider`**: Handles view transitions and navigation history.
 - **`PluginsProvider`**: Manages the lifecycle and state of loaded plugins.
 
@@ -44,6 +45,7 @@ Services provide a singleton-based abstraction for side effects:
 
 - **`PlayerService`**: Low-level `mpv` process management and IPC communication.
 - **`MusicService`**: High-level wrapper for YouTube Music search and metadata retrieval.
+- **`FavoritesService`**: Manages favorite tracks persistence (`favorites.json`).
 - **`ConfigService`**: Manages user configuration stored in `~/.youtube-music-cli/config.json`.
 - **`PluginService`**: Handles plugin discovery, installation, and activation.
 

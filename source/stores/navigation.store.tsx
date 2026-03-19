@@ -12,6 +12,8 @@ import {
 	type ReactNode,
 } from 'react';
 
+import {VIEW} from '../utils/constants.ts';
+
 const defaultSearchFilters: SearchFilters = {
 	artist: '',
 	album: '',
@@ -20,7 +22,7 @@ const defaultSearchFilters: SearchFilters = {
 };
 
 const initialState: NavigationState = {
-	currentView: 'player',
+	currentView: VIEW.HOME,
 	previousView: null,
 	searchQuery: '',
 	searchCategory: 'all',

@@ -190,15 +190,16 @@ const { currentTrack, isPlaying } = usePlayer();
 
 ## Key Files Reference
 
-| File                             | Purpose                                 |
-| -------------------------------- | --------------------------------------- |
-| `source/cli.tsx`                 | CLI argument parsing with meow          |
-| `source/app.tsx`                 | Root React component, sets up providers |
-| `source/stores/player.store.tsx` | Player state management                 |
-| `source/types/player.types.ts`   | Player type definitions                 |
-| `source/services/player/`        | Audio playback service                  |
-| `eslint.config.ts`               | ESLint flat config                      |
-| `package.json`                   | Dependencies and scripts                |
+| File                                | Purpose                                 |
+| ----------------------------------- | --------------------------------------- |
+| `source/cli.tsx`                    | CLI argument parsing with meow          |
+| `source/app.tsx`                    | Root React component, sets up providers |
+| `source/stores/player.store.tsx`    | Player state management                 |
+| `source/stores/favorites.store.tsx` | Favorites state management              |
+| `source/types/player.types.ts`      | Player type definitions                 |
+| `source/services/player/`           | Audio playback service                  |
+| `eslint.config.ts`                  | ESLint flat config                      |
+| `package.json`                      | Dependencies and scripts                |
 
 ## Commands Reference
 
